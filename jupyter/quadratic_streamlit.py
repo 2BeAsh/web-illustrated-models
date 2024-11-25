@@ -9,7 +9,7 @@ st.sidebar.title('Sinusoidal Animation')
 frequency = st.sidebar.slider("Frequency", min_value=0.1, max_value=5.0, value=1.0, step=0.1)
 
 # Create frames for sine wave
-x = np.linspace(0, 4 * np.pi, 1000)
+x = np.linspace(0, 4 * np.pi, 10_000)
 frames = []
 
 for i in range(200):
