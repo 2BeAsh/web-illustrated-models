@@ -8,7 +8,7 @@ CORS(app)
 def model():
     data = request.json
     # Example: Simulate running a model
-    params = data.get("parameters", {})
+    params = data.get("parameters", {})  # Second argument is default value
     result = {key: value ** 2 for key, value in params.items()}  # Dummy calculation
     return jsonify({"result": result})
 
