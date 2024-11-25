@@ -1,25 +1,29 @@
 # Imports
 import streamlit as st
 import numpy as np
-import matplotlib.pyplot as plt
-
-# Create sliders for parameters
-st.sidebar.header("Adjust Model parameters")
-a = st.sidebar.slider("a", -10, 10, 1, 1)
-b = st.sidebar.slider("b", -20, 20, 0, 2)
+import plotly.graph_objects as go
 
 
-# Function
-def plot_quadratic(a, b):
-    x = np.linspace(-10, 10, 100)
-    y = a * x ** 2 + b 
+# Create frames for sine wave
+x = np.linspace(0, 4 * np.pi, 100)
+frames = []
+
+for i in range(50):
+    y = np.sin(x + (i * 0.1))
+    frames.append(go.Frame(data=[go.Scatter(x=x, y=y)]))
     
-    fig, ax = plt.subplots(figsize=(10, 6))
-    ax.plot(x, y)
-    ax.set(xlabel="x", ylabel="y", title=fr"$y = {a}x^2 + {b}$",
-           ylim=[-100, 100])
-    ax.grid()
-    return fig
+# Define initial trace
+initial_trace = go.Scatter(x=x, y=np.sin(x))
 
-# Display
-st.pyplot(plot_quadratic(a, b))
+# Figure
+fig = go.Figure(data=[initial_trace],
+                frames=frames,
+                layout=go.Layout(
+                    updatemenus=[dict(type='buttons', showactive=False,
+                                      buttons=[dict(label='Play',
+                                                    method="animate",
+                                                    args=[None])])]))
+
+
+# Display animated figure
+st.plotly_chart(fig)
