@@ -12,7 +12,7 @@ frequency = st.sidebar.slider("Frequency", min_value=0.1, max_value=5.0, value=1
 x = np.linspace(0, 2 * np.pi, 1000)
 frames = []
 
-for i in range(200):
+for i in range(100):
     y = np.sin(frequency * (x + i*0.5))
     frames.append(go.Frame(data=[go.Scatter(x=x, y=y)]))
     
@@ -30,7 +30,8 @@ fig = go.Figure(
                  buttons=[
                      dict(label='Play',
                           method="animate",
-                          args=[None,] #{"mode": "immediate", "frame" : {"redraw": True}, "fromcurrent": True}],
+                          args=[None, {"mode": "immediate", "frame" : {"redraw": True}, "fromcurrent": True}],
+                        #   args=[None, ],
                  )])]))
 
 
