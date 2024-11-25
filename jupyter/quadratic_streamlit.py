@@ -38,20 +38,21 @@ grid = initialize_grid(N)
 # Create a placeholder for the plot
 plot_placeholder = st.empty()
 
-# Perform Metropolis steps and update the plot
-for step in range(steps):
-    # Perform one Metropolis step
-    grid = metropolis_step(grid, beta)
+if st.button('Run Simulation'):
+    # Perform Metropolis steps and update the plot
+    for step in range(steps):
+        # Perform one Metropolis step
+        grid = metropolis_step(grid, beta)
 
-    # Create the plot
-    fig, ax = plt.subplots(figsize=(6, 6))
-    ax.imshow(grid, cmap='coolwarm', interpolation='nearest')
-    ax.set_xticks([])
-    ax.set_yticks([])
-    ax.set_title(f"Step {step + 1}")
+        # Create the plot
+        fig, ax = plt.subplots(figsize=(6, 6))
+        ax.imshow(grid, cmap='coolwarm', interpolation='nearest')
+        ax.set_xticks([])
+        ax.set_yticks([])
+        ax.set_title(f"Step {step + 1}")
 
-    # Display the plot in Streamlit
-    plot_placeholder.pyplot(fig)
+        # Display the plot in Streamlit
+        plot_placeholder.pyplot(fig)
 
-    # Add a small delay to make the animation visible
-    time.sleep(0.1)
+        # Add a small delay to make the animation visible
+        time.sleep(0.05)
