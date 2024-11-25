@@ -9,11 +9,11 @@ st.sidebar.title('Sinusoidal Animation')
 frequency = st.sidebar.slider("Frequency", min_value=0.1, max_value=5.0, value=1.0, step=0.1)
 
 # Create frames for sine wave
-x = np.linspace(0, 4 * np.pi, 1000)
+x = np.linspace(0, 2 * np.pi, 1000)
 frames = []
 
 for i in range(200):
-    y = np.sin(frequency * (x + i))
+    y = np.sin(frequency * (x + i*0.05))
     frames.append(go.Frame(data=[go.Scatter(x=x, y=y)]))
     
 # Define initial trace
@@ -30,7 +30,7 @@ fig = go.Figure(
                  buttons=[
                      dict(label='Play',
                           method="animate",
-                          args=[None, {"mode": "immediate", "frame" : {"redraw": True}, "fromcurrent": True}],
+                          args=[None,] #{"mode": "immediate", "frame" : {"redraw": True}, "fromcurrent": True}],
                  )])]))
 
 
