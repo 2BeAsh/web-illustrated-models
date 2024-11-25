@@ -13,7 +13,7 @@ x = np.linspace(0, 2 * np.pi, 1000)
 frames = []
 
 for i in range(100):
-    y = np.sin(frequency * (x + i*0.5))
+    y = np.sin(frequency * (x + i*0.05))
     frames.append(go.Frame(data=[go.Scatter(x=x, y=y)]))
     
 # Define initial trace
@@ -30,8 +30,10 @@ fig = go.Figure(
                  buttons=[
                      dict(label='Play',
                           method="animate",
-                          args=[None, {"mode": "immediate", "frame" : {"redraw": True}, "fromcurrent": True}],
+                        #   args=[None, {"mode": "immediate", "frame" : {"redraw": True}, "fromcurrent": True}],
                         #   args=[None, ],
+                          args=[None, {"frame": {"duration": 20, "redraw": True}, "fromcurrent": True, "mode": "immediate"}],
+                          
                  )])]))
 
 
