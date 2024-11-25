@@ -13,11 +13,11 @@ x = np.linspace(0, 4 * np.pi, 100)
 frames = []
 
 for i in range(50):
-    y = np.sin(x + (i * frequency))
+    y = np.sin(frequency * (x + (i * 0.1)))
     frames.append(go.Frame(data=[go.Scatter(x=x, y=y)]))
     
 # Define initial trace
-initial_trace = go.Scatter(x=x, y=np.sin(x))
+initial_trace = go.Scatter(x=x, y=np.sin(frequency*x))
 
 # Figure
 fig = go.Figure(
