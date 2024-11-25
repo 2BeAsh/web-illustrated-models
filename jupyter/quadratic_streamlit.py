@@ -24,7 +24,7 @@ def metropolis_step(grid, beta):
 
 
 # Sidebar controls
-st.sidebar.header("Ising Model")
+st.sidebar.header("2D Ising Model Parameters")
 N = st.sidebar.slider('Grid Size (N)', min_value=10, max_value=100, value=50, step=10)
 temperature = st.sidebar.slider('Temperature (T)', min_value=0.1, max_value=5.0, value=2.0, step=0.1)
 steps = st.sidebar.number_input('Number of Steps', min_value=1, max_value=1000, value=100, step=10)
@@ -38,7 +38,16 @@ grid = initialize_grid(N)
 # Create a placeholder for the plot
 plot_placeholder = st.empty()
 
-if st.button('Run Simulation'):
+# Display the initial state before the animation starts
+fig, ax = plt.subplots(figsize=(6, 6))
+ax.imshow(grid, cmap='coolwarm', interpolation='nearest')
+ax.set_xticks([])
+ax.set_yticks([])
+ax.set_title("Initial State")
+plot_placeholder.pyplot(fig)
+
+# Button to start the animation
+if st.button("Start Animation"):
     # Perform Metropolis steps and update the plot
     for step in range(steps):
         # Perform one Metropolis step
