@@ -38,9 +38,9 @@ grid = initialize_grid(N)
 # Create a placeholder for the plot
 plot_placeholder = st.empty()
 
-# Display the initial state before the animation starts
+# Create the initial figure and axis once
 fig, ax = plt.subplots(figsize=(6, 6))
-ax.imshow(grid, cmap='coolwarm', interpolation='nearest')
+img = ax.imshow(grid, cmap='coolwarm', interpolation='nearest')
 ax.set_xticks([])
 ax.set_yticks([])
 ax.set_title("Initial State")
@@ -53,15 +53,12 @@ if st.button("Start Animation"):
         # Perform one Metropolis step
         grid = metropolis_step(grid, beta)
 
-        # Create the plot
-        fig, ax = plt.subplots(figsize=(6, 6))
-        ax.imshow(grid, cmap='coolwarm', interpolation='nearest')
-        ax.set_xticks([])
-        ax.set_yticks([])
+        # Update the image data
+        img.set_data(grid)
         ax.set_title(f"Step {step + 1}")
 
-        # Display the plot in Streamlit
+        # Display the updated plot in Streamlit
         plot_placeholder.pyplot(fig)
 
         # Add a small delay to make the animation visible
-        time.sleep(0.05)
+        time.sleep(0.1)
