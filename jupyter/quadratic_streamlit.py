@@ -13,7 +13,7 @@ x = np.linspace(0, 2 * np.pi, 1000)
 frames = []
 
 for i in range(200):
-    y = np.sin(frequency * (x + i*0.05))
+    y = np.sin(frequency * (x + i*0.5))
     frames.append(go.Frame(data=[go.Scatter(x=x, y=y)]))
     
 # Define initial trace
