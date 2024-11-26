@@ -13,10 +13,10 @@ class ErdosRenyiNetworkModel():
     
     
     def _streamlit_setup(self):
-        st.header("Erdos-Renyi Network Model")
+        st.header("Erdos-Renyi Network")
         st.sidebar.header("Erdos-Renyi Network Parameters")
         
-        self.N = st.sidebar.slider("Number of nodes (N)", min_value=10, max_value=100, value=50, step=10)
+        self.N = st.sidebar.slider("Number of nodes (N)", min_value=5, max_value=100, value=50, step=5)
         self.p = st.sidebar.slider("Edge probability (p)", min_value=0.1, max_value=1.0, value=0.5, step=0.1)
         self.time_steps = st.sidebar.number_input("Time steps", min_value=1, max_value=1000, value=100, step=10)
         
