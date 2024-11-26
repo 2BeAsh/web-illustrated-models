@@ -10,11 +10,11 @@ st.sidebar.header("Select Model")
 model = st.sidebar.selectbox("Choose a model", ["Sine wave", "Ising"])
 
 
-if model == "Sine wave":
+if model == "Ising":
     ising_model = IsingModel()
     ising_model.animate()
     
-elif model == "Ising":
+elif model == "Sine wave":
     sinewave_model = SineWaveModel()
     sinewave_model.animate()
     
