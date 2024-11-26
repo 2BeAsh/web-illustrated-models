@@ -7,7 +7,7 @@ from sine_wave_model import SineWaveModel
 
 # Model selection
 st.sidebar.header("Select Model")  
-model = st.sidebar.selectbox("", options=["Sine wave", "Ising"])
+model = st.sidebar.selectbox(label=None, options=["Sine wave", "Ising"])
 
 
 if model == "Ising":
