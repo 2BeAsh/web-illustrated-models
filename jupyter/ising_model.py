@@ -45,7 +45,7 @@ class IsingModel():
         ax.imshow(self.grid, cmap='coolwarm', interpolation='nearest')
         ax.set_xticks([])
         ax.set_yticks([])
-        ax.set_title("Initial State")
+        ax.set_title("Initial State", fontsize=10)
         self.plot_placeholder.pyplot(fig)
                 
                 
@@ -54,17 +54,17 @@ class IsingModel():
         ax.imshow(self.grid, cmap='coolwarm', interpolation='nearest')
         ax.set_xticks([])
         ax.set_yticks([])
-        ax.set_title(f"Step {step + 1}")
+        ax.set_title(f"Step {step + 1}", fontsize=10)
         self.plot_placeholder.pyplot(fig)
         time.sleep(0.1)
         
         
     def animate(self):
         self._streamlit_setup()
-        
         self._initialize_grid()
         self._initial_image()
         
+        # Create animation
         if st.button("Play"):
             for i in range(self.time_steps):
                 self._ising_step()
