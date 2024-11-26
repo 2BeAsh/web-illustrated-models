@@ -65,6 +65,7 @@ class IsingModel():
         self._initialize_grid()
         self._initial_image()
         
-        for i in range(self.time_steps):
-            self._ising_step()
-            self._append_fig(i)
+        if st.button("Play"):
+            for i in range(self.time_steps):
+                self._ising_step()
+                self._append_fig(i)
