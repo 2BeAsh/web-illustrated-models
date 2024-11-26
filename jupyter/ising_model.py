@@ -13,9 +13,9 @@ class IsingModel():
         st.header("2D Ising Model")
         st.sidebar.header("2D Ising Model Parameters")
         
-        self.N = st.slider("Grid Size (N)", min_value=10, max_value=100, value=50, step=10)
-        self.temperature = st.slider("Temperature (T)", min_value=0.1, max_value=5.0, value=2.0, step=0.1)
-        self.time_steps = st.number_input("Time steps", min_value=1, max_value=1000, value=100, step=10)
+        self.N = st.sidebar.slider("Grid Size (N)", min_value=10, max_value=100, value=50, step=10)
+        self.temperature = st.sidebar.slider("Temperature (T)", min_value=0.1, max_value=5.0, value=2.0, step=0.1)
+        self.time_steps = st.sidebar.number_input("Time steps", min_value=1, max_value=1000, value=100, step=10)
 
         self.beta = 1. / self.temperature
     

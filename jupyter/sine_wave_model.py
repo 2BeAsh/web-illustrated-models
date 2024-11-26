@@ -11,7 +11,8 @@ class SineWaveModel:
 
     def _streamlit_setup(self):
         # Sidebar sliders for parameters
-        st.sidebar.title('Sinusoidal Animation')
+        st.header('Sinusoidal Animation')
+        st.sidebar.header('Sine Wave Parameters')
         self.frequency = st.sidebar.slider("Frequency", min_value=0.1, max_value=5.0, value=1.0, step=0.1)
 
 
