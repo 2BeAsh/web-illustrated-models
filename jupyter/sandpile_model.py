@@ -1,7 +1,6 @@
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
-import time
 
 class SandpileModel:
     def __init__(self):
@@ -10,6 +9,8 @@ class SandpileModel:
         self.ax = None
         self.cax = None
         self.plot_placeholder = None
+        self.step = 0  # Track current step number
+        self.running = False  # Track if the simulation is running
     
     
     def _streamlit_setup(self):
@@ -22,6 +23,14 @@ class SandpileModel:
         self.critical_height = 4
         self.time_steps = st.sidebar.number_input("Number of Time Steps", min_value=1, max_value=1000, value=100, step=10)
         self.add_location = st.sidebar.selectbox("Grain Addition Location", ("Center", "Random"))
+        self.update_interval = st.sidebar.slider("Update Interval", min_value=1, max_value=50, value=5, step=1)  # How often to update the plot
+    
+        if st.button("Play"):
+            self.running = True
+            st.experimental_rerun()
+        if st.button("Stop"):
+            self.running = False
+            st.experimental_rerun()
     
         
     def _initial_grid(self):
@@ -35,6 +44,7 @@ class SandpileModel:
 
     def _topple(self):
         self.avalanche_size = 0
+        iteration = 0
 
         while np.any(self.grid >= self.critical_height):
             unstable_sites = np.argwhere(self.grid >= self.critical_height)
@@ -50,31 +60,37 @@ class SandpileModel:
                 if y < self.N - 1:
                     self.grid[x, y + 1] += 1
 
-                # Update the data in the image after each topple
-                self.cax.set_data(self.grid)
-                self.ax.set_title(f"Step {self.step + 1}, Avalanche size = {self.avalanche_size}")
-                self.plot_placeholder.pyplot(self.fig)
-                time.sleep(0.5)
+                iteration += 1
+                # Update the data in the image after every 'update_interval' iterations
+                if iteration % self.update_interval == 0:
+                    self.cax.set_data(self.grid)
+                    self.ax.set_title(f"Avalanche in Progress, Size = {self.avalanche_size}")
+                    self.plot_placeholder.pyplot(self.fig)
+                    st.experimental_rerun()
 
 
     def animate(self):
         # Initialize
         self._streamlit_setup()
-        self._initial_grid()
-        
-        # Initial image and figure setup
-        self.plot_placeholder = st.empty()
-        self.fig, self.ax = plt.subplots(figsize=(6, 6))
-        cmap = plt.cm.colors.ListedColormap(['black', 'red', 'orange', 'yellow', 'white'])
-        self.cax = self.ax.imshow(self.grid, cmap=cmap, interpolation="nearest")
-        cbar = self.fig.colorbar(self.cax, ax=self.ax, boundaries=np.arange(-0.5, self.critical_height + 1, 1), ticks=range(self.critical_height + 1))
-        cbar.ax.set_yticklabels([str(i) for i in range(self.critical_height + 1)])
-        cbar.set_label('Height')
-        self.plot_placeholder.pyplot(self.fig)
+        if not self.running:
+            return
+
+        if self.fig is None:
+            self._initial_grid()
+            
+            # Initial image and figure setup
+            self.plot_placeholder = st.empty()
+            self.fig, self.ax = plt.subplots(figsize=(6, 6))
+            cmap = plt.cm.colors.ListedColormap(['black', 'red', 'orange', 'yellow', 'white'])
+            self.cax = self.ax.imshow(self.grid, cmap=cmap, interpolation="nearest")
+            cbar = self.fig.colorbar(self.cax, ax=self.ax, boundaries=np.arange(-0.5, self.critical_height + 1, 1), ticks=range(self.critical_height + 1))
+            cbar.ax.set_yticklabels([str(i) for i in range(self.critical_height + 1)])
+            cbar.set_label('Height')
+            self.plot_placeholder.pyplot(self.fig)
       
-        # Run simulation if button is pressed
-        if st.button("Play"):
-            for self.step in range(self.time_steps):
+        # Run simulation if running is True
+        if self.running:
+            for _ in range(self.time_steps - self.step):
                 # Add grain
                 if self.add_location == "Center":
                     self._add_grain(self.N // 2, self.N // 2)
@@ -86,4 +102,12 @@ class SandpileModel:
                 self.cax.set_data(self.grid)
                 self.ax.set_title(f"Step {self.step + 1}, Avalanche size = {self.avalanche_size}")
                 self.plot_placeholder.pyplot(self.fig)
-                time.sleep(0.01)  # Small delay to visualize the simulation
+                self.step += 1
+                st.experimental_rerun()
+
+# Run the application
+if 'sandpile' not in st.session_state:
+    st.session_state.sandpile = SandpileModel()
+
+sandpile = st.session_state.sandpile
+sandpile.animate()
