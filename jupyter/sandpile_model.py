@@ -89,7 +89,7 @@ class SandpileModel:
         # Run simulation if button is pressed
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
-            if st.button("Play", key='play_button', help='Click to start the simulation', use_container_width=True):
+            if st.button("Play", key='play_button', help='Click to start the simulation', use_container_width=True, fontsize=20):
                 for step in range(self.time_steps):
                     self._step()    
                     
