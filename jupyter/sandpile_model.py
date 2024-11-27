@@ -32,6 +32,7 @@ class SandpileModel:
 
     def _topple(self):
         self.avalanche_size = 0
+        self.avalanche_grid[:] = 0  # Reset avalanche grid
         while np.any(self.grid >= self.critical_height):
             unstable_sites = np.argwhere(self.grid >= self.critical_height)
             for x, y in unstable_sites:
