@@ -30,6 +30,7 @@ class SandpileModel:
 
 
     def _topple(self):
+
         self.avalanche_size = 0
         while np.any(self.grid >= self.critical_height):
             unstable_sites = np.argwhere(self.grid >= self.critical_height)
@@ -45,6 +46,13 @@ class SandpileModel:
                 if y < self.N - 1:
                     self.grid[x, y + 1] += 1
 
+            # Update the data in the image after each topple
+            self.cax.set_data(self.grid)
+            self.ax.set_title(f"Avalanche in Progress, Size = {self.avalanche_size}")
+            self.plot_placeholder.pyplot(self.fig)
+            time.sleep(0.01)
+
+
 
     def animate(self):
         # Initialize
@@ -52,14 +60,14 @@ class SandpileModel:
         self._initial_grid()
         
         # Initial image and figure setup
-        plot_placeholder = st.empty()
-        fig, ax = plt.subplots(figsize=(6, 6))
+        self.plot_placeholder = st.empty()
+        self.fig, self.ax = plt.subplots(figsize=(6, 6))
         cmap = plt.cm.colors.ListedColormap(['black', 'red', 'orange', 'yellow', 'white'])
-        cax = ax.imshow(self.grid, cmap=cmap, interpolation="nearest")
-        cbar = fig.colorbar(cax, ax=ax, boundaries=np.arange(-0.5, self.critical_height + 1, 1), ticks=range(self.critical_height + 1))
-        cbar.ax.set_yticklabels([str(i) for i in range(self.critical_height + 1)])
+        self.cax = self.ax.imshow(self.grid, cmap=cmap, interpolation="nearest")
+        cbar = self.fig.colorbar(self.cax, ax=self.ax, boundaries=np.arange(-0.5, self.critical_height + 1, 1), ticks=range(self.critical_height + 1))
+        cbar.self.ax.set_yticklabels([str(i) for i in range(self.critical_height + 1)])
         cbar.set_label('Height')
-        plot_placeholder.pyplot(fig)
+        self.plot_placeholder.pyplot(self.fig)
       
         # Run simulation if button is pressed
         if st.button("Play"):
@@ -72,7 +80,7 @@ class SandpileModel:
                     self._add_grain(x, y)
 
                 # Update the data in the image instead of calling imshow
-                cax.set_data(self.grid)
-                ax.set_title(f"Step {step + 1}, Avalanche size = {self.avalanche_size}")
-                plot_placeholder.pyplot(fig)
+                self.cax.set_data(self.grid)
+                self.ax.set_title(f"Step {step + 1}, Avalanche size = {self.avalanche_size}")
+                self.plot_placeholder.pyplot(self.fig)
                 time.sleep(0.01)  # Small delay to visualize the simulation
