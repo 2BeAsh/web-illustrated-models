@@ -77,9 +77,10 @@ class SandpileModel():
         self._initialize_grid()
         self._initial_image()
         
-        for step in range(self.time_steps):
-            self._add_grain(step)
-            self._topple(step)
-            
+        if st.button("Play"):
+            for step in range(self.time_steps):
+                self._add_grain(step)
+                self._topple(step)
+                
     
     
