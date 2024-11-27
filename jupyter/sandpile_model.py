@@ -32,7 +32,7 @@ class SandpileModel():
 
     
     def _initialize_grid(self):
-        self.grid = np.random.randint(low=0, high=self.critical_height-1, size=(self.N, self.N))
+        self.grid = np.random.randint(low=0, high=self.critical_height, size=(self.N, self.N))
     
     
     def _add_grain(self, step):    
@@ -69,7 +69,7 @@ class SandpileModel():
         ax.matshow(self.grid, cmap="hot")
         ax.set_title(f"Step {step + 1}", fontsize=10)
         self.plot_placeholder.pyplot(fig)   
-        time.sleep(0.1)
+        time.sleep(0.05)
     
             
     def animate(self):
