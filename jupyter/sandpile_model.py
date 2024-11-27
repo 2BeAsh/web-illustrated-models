@@ -29,8 +29,9 @@ class SandpileModel():
         self.ax.set_yticks([])
         
         # Add colorbar to show the height of each color
-        cbar = self.fig.colorbar(self.img, ax=self.ax, orientation='vertical')
+        cbar = self.fig.colorbar(self.img, ax=self.ax, orientation='vertical', ticks=np.arange(6))
         cbar.set_label('Height', fontsize=10)
+        cbar.ax.set_yticklabels([str(i) for i in range(6)])
         
         self.plot_placeholder.pyplot(self.fig)
         
