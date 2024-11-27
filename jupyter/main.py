@@ -24,8 +24,5 @@ elif model == "Erdos-Renyi Network":
     network_model.animate()
     
 elif model == "Sandpile":
-    if 'sandpile' not in st.session_state:
-        st.session_state.sandpile = SandpileModel()
-
-    sandpile = st.session_state.sandpile
+    sandpile = SandpileModel()
     sandpile.animate()
