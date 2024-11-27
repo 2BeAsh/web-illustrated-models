@@ -64,6 +64,7 @@ class SandpileModel():
     
     def _topple(self, step):
         """Topple the grid if any site has more grains than the critical height"""
+        avalanche_size = 0
         while np.any(self.grid >= self.critical_height):
             # Find the site with more grains than the critical height
             x, y = np.where(self.grid >= self.critical_height)
@@ -81,13 +82,15 @@ class SandpileModel():
             self.grid[x, y_minus_one] += 1
             self.grid[x, y_plus_one] += 1
             
+            avalanche_size += 1
+            
             # Append current grid to list of figures
-            self._append_fig(step)
+            self._append_fig(step, avalanche_size)
     
     
-    def _append_fig(self, step):
+    def _append_fig(self, step, avalanche_size=0):
         self.img.set_data(self.grid)
-        self.ax.set_title(f"Step {step + 1}", fontsize=10)
+        self.ax.set_title(f"Step {step + 1}, Avalanche size = {avalanche_size}", fontsize=10)
         self.plot_placeholder.pyplot(self.fig)   
         time.sleep(0.05)
     
