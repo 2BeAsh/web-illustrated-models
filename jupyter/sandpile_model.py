@@ -64,46 +64,37 @@ class SandpileModel:
         
         # Initial image and figure setup
         plot_placeholder = st.empty()
-        fig, ax = plt.subplots(figsize=(6, 6))
-        ax.set(xticks=[], yticks=[])
-        ax.set_title("Initial state", fontsize=10)
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
+        
+        # Grid state plot
+        ax1.set(xticks=[], yticks=[])
+        ax1.set_title("Initial state", fontsize=10)
         cmap = plt.cm.colors.ListedColormap(['black', 'red', 'orange', 'yellow', 'white'])
-        cax = ax.imshow(self.grid, cmap=cmap, interpolation="nearest")
-        cbar = fig.colorbar(cax, ax=ax, boundaries=np.arange(-0.5, self.critical_height + 1, 1), ticks=range(self.critical_height + 1))
-        cbar.ax.set_yticklabels([str(i) for i in range(self.critical_height + 1)])
-        cbar.set_label('Height')
+        cax1 = ax1.imshow(self.grid, cmap=cmap, interpolation="nearest", vmin=0, vmax=self.critical_height)
+        cbar1 = fig.colorbar(cax1, ax=ax1, boundaries=np.arange(-0.5, self.critical_height + 1, 1), ticks=range(self.critical_height + 1))
+        cbar1.ax.set_yticklabels([str(i) for i in range(self.critical_height + 1)])
+        cbar1.set_label('Height')
+        
+        # Avalanche size heatmap plot
+        ax2.set(xticks=[], yticks=[])
+        ax2.set_title("Avalanche Size Heatmap", fontsize=10)
+        cax2 = ax2.imshow(self.avalanche_grid, cmap="magma", interpolation="nearest", vmin=0, vmax=5)
+        cbar2 = fig.colorbar(cax2, ax=ax2)
+        cbar2.set_label('Number of Topplings')
+        
         plot_placeholder.pyplot(fig)
-      
-        # Initial avalanche size image
-        avalanche_placeholder = st.empty()
-        fig_av, ax_av = plt.subplots(figsize=(6, 6))
-        ax_av.set(xticks=[], yticks=[])
-        ax_av.set_title("Avalanche Size Heatmap", fontsize=10)
-        cax_av = ax_av.imshow(self.avalanche_grid, cmap="magma", interpolation="nearest", vmin=0, vmax=4)
-        cbar_av = fig_av.colorbar(cax_av, ax=ax_av)
-        cbar_av.set_label('Number of Topplings')
-        avalanche_placeholder.pyplot(fig_av)
       
         # Run simulation if button is pressed
         if st.button("Play"):
-            max_topplings = 0  # Track the maximum number of topplings
-
             for step in range(self.time_steps):
                 self._step()    
                 
-                # Update the data in the image 
-                cax.set_data(self.grid)
-                ax.set_title(f"Step {step + 1}", fontsize=10)
-                plot_placeholder.pyplot(fig)
+                # Update the data in the images
+                cax1.set_data(self.grid)
+                ax1.set_title(f"Step {step + 1}", fontsize=10)
+                cax2.set_data(self.avalanche_grid)
                 
-                # Update avalanche size image and adjust vmax if needed
-                current_max_topplings = np.max(self.avalanche_grid)
-                if current_max_topplings > max_topplings:
-                    max_topplings = current_max_topplings
-                    cax_av.set_clim(vmin=0, vmax=max(4, max_topplings))  # Update vmax for color range
-
-                cax_av.set_data(self.avalanche_grid)
-                avalanche_placeholder.pyplot(fig_av)
+                plot_placeholder.pyplot(fig)
                 
                 time.sleep(0.1)  # Small delay to visualize the simulation
 
