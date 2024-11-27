@@ -21,7 +21,7 @@ class SandpileModel:
     
         
     def _initial_grid(self):
-        self.grid = np.random.randint(low=0, high=3, size=(self.N, self.N), dtype=int)
+        self.grid = np.random.randint(low=0, high=self.critical_height+1, size=(self.N, self.N), dtype=int)
     
 
     def _add_grain(self, x, y):
@@ -71,13 +71,8 @@ class SandpileModel:
                     x, y = np.random.randint(0, self.N, size=2)
                     self._add_grain(x, y)
 
-                # Plot the current state
-                ax.clear()
-                cax = ax.imshow(self.grid, cmap=cmap, interpolation="nearest")
-                cbar = fig.colorbar(cax, ax=ax, boundaries=np.arange(-0.5, self.critical_height + 1, 1), ticks=range(self.critical_height + 1))
-                cbar.ax.set_yticklabels([str(i) for i in range(self.critical_height + 1)])
-                cbar.set_label('Height')
+                # Update the data in the image instead of calling imshow
+                cax.set_data(self.grid)
                 ax.set_title(f"Step {step + 1}, Avalanche size = {self.avalanche_size}")
-                ax.axis('off')
                 plot_placeholder.pyplot(fig)
                 time.sleep(0.01)  # Small delay to visualize the simulation
