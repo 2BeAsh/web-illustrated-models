@@ -31,7 +31,8 @@ class SandpileModel():
 
     
     def _initialize_grid(self):
-        self.grid = np.random.randint(low=0, high=3, size=(self.N, self.N))
+        # self.grid = np.random.randint(low=0, high=3, size=(self.N, self.N))
+        self.grid = 3 * np.ones((self.N, self.N))
     
     
     def _add_grain_random(self, step):    
