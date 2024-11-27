@@ -87,16 +87,18 @@ class SandpileModel:
         plot_placeholder.pyplot(fig)
       
         # Run simulation if button is pressed
-        if st.button("Play"):
-            for step in range(self.time_steps):
-                self._step()    
-                
-                # Update the data in the images
-                cax1.set_data(self.grid)
-                ax1.set_title(f"Step {step + 1}", fontsize=10)
-                cax2.set_data(self.avalanche_grid)
-                
-                plot_placeholder.pyplot(fig)
-                
-                time.sleep(0.1)  # Small delay to visualize the simulation
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            if st.button("Play", key='play_button', help='Click to start the simulation', use_container_width=True):
+                for step in range(self.time_steps):
+                    self._step()    
+                    
+                    # Update the data in the images
+                    cax1.set_data(self.grid)
+                    ax1.set_title(f"Step {step + 1}", fontsize=10)
+                    cax2.set_data(self.avalanche_grid)
+                    
+                    plot_placeholder.pyplot(fig)
+                    
+                    time.sleep(0.1)  # Small delay to visualize the simulation
 
