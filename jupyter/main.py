@@ -8,7 +8,7 @@ from sandpile_model import SandpileModel
 
 # Model selection
 st.sidebar.header("Select Model")  
-model = st.sidebar.selectbox(label="", options=["Sine wave", "Ising", "Erdos-Renyi Network, Sandpile"])
+model = st.sidebar.selectbox(label="Choose a model", options=["Sine wave", "Ising", "Erdos-Renyi Network, Sandpile"])
 
 
 if model == "Ising":
