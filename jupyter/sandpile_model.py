@@ -14,7 +14,6 @@ class SandpileModel():
         st.sidebar.header("Sandpile Model Parameters")
         
         self.N = st.sidebar.slider("Grid size (N)", min_value=5, max_value=100, value=50, step=5)
-        self.critical_height = st.sidebar.slider("Critical height", min_value=1, max_value=10, value=4, step=1)
         self.time_steps = st.sidebar.number_input("Time steps", min_value=1, max_value=1000, value=100, step=10)
         self.grain_add_location = st.sidebar.radio("Where are grains added?", ["Random", "Center", "Top left corner"])
         
@@ -32,7 +31,7 @@ class SandpileModel():
 
     
     def _initialize_grid(self):
-        self.grid = np.random.randint(low=0, high=self.critical_height-1, size=(self.N, self.N))
+        self.grid = np.random.randint(low=0, high=3, size=(self.N, self.N))
     
     
     def _add_grain_random(self, step):    
@@ -67,11 +66,11 @@ class SandpileModel():
         avalanche_size = 0
             
         
-        while np.any(self.grid > self.critical_height):
-            unstable_sites = np.argwhere(self.grid > self.critical_height)
+        while np.any(self.grid >= 4):
+            unstable_sites = np.argwhere(self.grid >= 4)
             
             for x, y in unstable_sites:
-                self.grid[x, y] -= self.critical_height
+                self.grid[x, y] -= 4
                 if x > 0:
                     self.grid[x - 1, y] += 1
                 if x < self.N - 1:
