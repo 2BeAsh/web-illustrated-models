@@ -26,11 +26,9 @@ class SandpileModel:
         self.update_interval = st.sidebar.slider("Update Interval", min_value=1, max_value=50, value=5, step=1)  # How often to update the plot
     
         if st.button("Play"):
-            self.running = True
-            st.rerun()
+            st.session_state.running = True
         if st.button("Stop"):
-            self.running = False
-            st.rerun()
+            st.session_state.running = False
     
         
     def _initial_grid(self):
@@ -61,16 +59,22 @@ class SandpileModel:
                     self.grid[x, y + 1] += 1
 
                 iteration += 1
-                self.cax.set_data(self.grid)
-                self.ax.set_title(f"Step {self.step + 1}, Avalanche size = {self.avalanche_size}")
-                self.plot_placeholder.pyplot(self.fig)
-                st.rerun()
+                # Update the data in the image after every 'update_interval' iterations
+                if iteration % self.update_interval == 0:
+                    self.cax.set_data(self.grid)
+                    self.ax.set_title(f"Step {self.step + 1}, Avalanche size = {self.avalanche_size}")
+                    self.plot_placeholder.pyplot(self.fig)
 
 
     def animate(self):
         # Initialize
         self._streamlit_setup()
-        if not self.running:
+        if 'running' not in st.session_state:
+            st.session_state.running = False
+        if 'step' not in st.session_state:
+            st.session_state.step = 0
+
+        if not st.session_state.running:
             return
 
         if self.fig is None:
@@ -87,8 +91,8 @@ class SandpileModel:
             self.plot_placeholder.pyplot(self.fig)
       
         # Run simulation if running is True
-        if self.running:
-            for _ in range(self.time_steps - self.step):
+        if st.session_state.running:
+            for _ in range(st.session_state.step, self.time_steps):
                 # Add grain
                 if self.add_location == "Center":
                     self._add_grain(self.N // 2, self.N // 2)
@@ -98,8 +102,10 @@ class SandpileModel:
 
                 # Update the data in the image instead of calling imshow
                 self.cax.set_data(self.grid)
-                self.ax.set_title(f"Step {self.step + 1}, Avalanche size = {self.avalanche_size}")
+                self.ax.set_title(f"Step {st.session_state.step + 1}, Avalanche size = {self.avalanche_size}")
                 self.plot_placeholder.pyplot(self.fig)
-                self.step += 1
-                st.rerun()
+                st.session_state.step += 1
 
+                # Stop if 'Stop' button is pressed
+                if not st.session_state.running:
+                    break
