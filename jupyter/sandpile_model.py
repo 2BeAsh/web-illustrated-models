@@ -30,9 +30,11 @@ class SandpileModel:
 
 
     def _topple(self):
+        self.avalanche_size = 0
         while np.any(self.grid >= self.critical_height):
             unstable_sites = np.argwhere(self.grid >= self.critical_height)
             for x, y in unstable_sites:
+                self.avalanche_size += 1
                 self.grid[x, y] -= 4
                 if x > 0:
                     self.grid[x - 1, y] += 1
@@ -53,7 +55,8 @@ class SandpileModel:
         plot_placeholder = st.empty()
         fig, ax = plt.subplots(figsize=(6, 6))
         ax.imshow(self.grid, cmap="hot", interpolation="nearest")         
-
+        plot_placeholder.pyplot(fig)
+      
         # Run simulation if button is pressed
         if st.button("Play"):
             for step in range(self.time_steps):
@@ -67,7 +70,7 @@ class SandpileModel:
                 # Plot the current state
                 ax.clear()
                 ax.imshow(self.grid, cmap="hot", interpolation="nearest")
-                ax.set_title(f"Step {step + 1}")
+                ax.set_title(f"Step {step + 1}, Avalanche size = {self.avalanche_size}")
                 ax.axis('off')
                 plot_placeholder.pyplot(fig)
                 time.sleep(0.1)  # Small delay to visualize the simulation        
