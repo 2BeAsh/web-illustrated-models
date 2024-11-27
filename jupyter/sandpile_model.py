@@ -22,14 +22,13 @@ class SandpileModel():
     def _initial_image(self):
         self.plot_placeholder = st.empty()
         
-        # Create custom colormap with distinct colors for each height
-        cmap = plt.cm.get_cmap("hot", self.critical_height)
-        
         # Display initial network state
-        fig, ax = plt.subplots(figsize=(8, 8))
-        ax.matshow(self.grid, cmap="hot")
-        ax.set_title("Initial State", fontsize=10)
-        self.plot_placeholder.pyplot(fig)
+        self.fig, self.ax = plt.subplots(figsize=(8, 8))
+        self.img = self.ax.matshow(self.grid, cmap="hot")
+        self.ax.set_title("Initial State", fontsize=10)
+        self.ax.set_xticks([])
+        self.ax.set_yticks([])
+        self.plot_placeholder.pyplot(self.fig)
 
     
     def _initialize_grid(self):
@@ -78,10 +77,9 @@ class SandpileModel():
     
     
     def _append_fig(self, step):
-        fig, ax = plt.subplots(figsize=(8, 8))
-        ax.matshow(self.grid, cmap="hot")
-        ax.set_title(f"Step {step + 1}", fontsize=10)
-        self.plot_placeholder.pyplot(fig)   
+        self.img.set_data(self.grid)
+        self.ax.set_title(f"Step {step + 1}", fontsize=10)
+        self.plot_placeholder.pyplot(self.fig)   
         time.sleep(0.05)
     
             
