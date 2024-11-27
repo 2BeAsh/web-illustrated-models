@@ -68,7 +68,7 @@ class SandpileModel:
         ax.set(xticks=[], yticks=[])
         ax.set_title("Initial state", fontsize=10)
         cmap = plt.cm.colors.ListedColormap(['black', 'red', 'orange', 'yellow', 'white'])
-        cax = ax.imshow(self.grid, cmap=cmap, interpolation="nearest", vmin=0, vmax=self.critical_height)
+        cax = ax.imshow(self.grid, cmap=cmap, interpolation="nearest")
         cbar = fig.colorbar(cax, ax=ax, boundaries=np.arange(-0.5, self.critical_height + 1, 1), ticks=range(self.critical_height + 1))
         cbar.ax.set_yticklabels([str(i) for i in range(self.critical_height + 1)])
         cbar.set_label('Height')
@@ -79,13 +79,15 @@ class SandpileModel:
         fig_av, ax_av = plt.subplots(figsize=(6, 6))
         ax_av.set(xticks=[], yticks=[])
         ax_av.set_title("Avalanche Size Heatmap", fontsize=10)
-        cax_av = ax_av.imshow(self.avalanche_grid, cmap="magma", interpolation="nearest", vmin=0, vmax=10)
+        cax_av = ax_av.imshow(self.avalanche_grid, cmap="magma", interpolation="nearest", vmin=0, vmax=100)
         cbar_av = fig_av.colorbar(cax_av, ax=ax_av)
         cbar_av.set_label('Number of Topplings')
         avalanche_placeholder.pyplot(fig_av)
       
         # Run simulation if button is pressed
         if st.button("Play"):
+            max_topplings = 0  # Track the maximum number of topplings
+
             for step in range(self.time_steps):
                 self._step()    
                 
@@ -94,7 +96,12 @@ class SandpileModel:
                 ax.set_title(f"Step {step + 1}", fontsize=10)
                 plot_placeholder.pyplot(fig)
                 
-                # Update avalanche size image
+                # Update avalanche size image and adjust vmax if needed
+                current_max_topplings = np.max(self.avalanche_grid)
+                if current_max_topplings > max_topplings:
+                    max_topplings = current_max_topplings
+                    cax_av.set_clim(vmin=0, vmax=max(100, max_topplings))  # Update vmax for color range
+
                 cax_av.set_data(self.avalanche_grid)
                 avalanche_placeholder.pyplot(fig_av)
                 
