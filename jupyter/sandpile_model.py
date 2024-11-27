@@ -30,7 +30,6 @@ class SandpileModel:
 
 
     def _topple(self):
-
         self.avalanche_size = 0
         while np.any(self.grid >= self.critical_height):
             unstable_sites = np.argwhere(self.grid >= self.critical_height)
@@ -72,8 +71,8 @@ class SandpileModel:
                     x, y = np.random.randint(0, self.N, size=2)
                     self._add_grain(x, y)
 
-                # Update the data in the image instead of calling imshow
+                # Update the data in the image 
                 cax.set_data(self.grid)
-                ax.set_title(f"Step {step + 1}, Avalanche size = {self.avalanche_size}")
+                ax.set_title(f"Step {step + 1}")
                 plot_placeholder.pyplot(fig)
-                time.sleep(0.01)  # Small delay to visualize the simulation
+                time.sleep(0.25)  # Small delay to visualize the simulation
