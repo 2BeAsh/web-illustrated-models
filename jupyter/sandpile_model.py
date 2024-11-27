@@ -19,7 +19,7 @@ class SandpileModel:
         st.sidebar.header("Parameters")
 
         # Model parameters
-        self.N = st.sidebar.slider("Grid Size (N)", min_value=10, max_value=100, value=50, step=10)
+        self.N = st.sidebar.slider("Grid Size (N)", min_value=10, max_value=100, value=50, step=10, key="sandpile_N")
         self.critical_height = 4
         self.time_steps = st.sidebar.number_input("Number of Time Steps", min_value=1, max_value=1000, value=100, step=10)
         self.add_location = st.sidebar.selectbox("Grain Addition Location", ("Center", "Random"))
@@ -106,8 +106,4 @@ class SandpileModel:
                 st.experimental_rerun()
 
 # Run the application
-if 'sandpile' not in st.session_state:
-    st.session_state.sandpile = SandpileModel()
 
-sandpile = st.session_state.sandpile
-sandpile.animate()
