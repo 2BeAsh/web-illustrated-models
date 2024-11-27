@@ -41,22 +41,19 @@ class IsingModel():
         self.plot_placeholder = st.empty()
 
         # Display initial grid state
-        fig, ax = plt.subplots(figsize=(6, 6))
-        ax.imshow(self.grid, cmap='coolwarm', interpolation='nearest')
-        ax.set_xticks([])
-        ax.set_yticks([])
-        ax.set_title("Initial State", fontsize=10)
-        self.plot_placeholder.pyplot(fig)
+        self.fig, self.ax = plt.subplots(figsize=(6, 6))
+        self.img = self.ax.imshow(self.grid, cmap='coolwarm', interpolation='nearest')
+        self.ax.set_xticks([])
+        self.ax.set_yticks([])
+        self.ax.set_title("Initial State", fontsize=10)
+        self.plot_placeholder.pyplot(self.fig)
                 
                 
     def _append_fig(self, step):
-        fig, ax = plt.subplots(figsize=(8, 8))
-        ax.imshow(self.grid, cmap='coolwarm', interpolation='nearest')
-        ax.set_xticks([])
-        ax.set_yticks([])
-        ax.set_title(f"Step {step + 1}", fontsize=10)
-        self.plot_placeholder.pyplot(fig)
-        time.sleep(0.1)
+        self.img.set_data(self.grid)
+        self.ax.set_title(f"Step {step + 1}", fontsize=10)
+        self.plot_placeholder.pyplot(self.fig)
+        time.sleep(0.05)
         
         
     def animate(self):
