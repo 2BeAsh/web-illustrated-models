@@ -61,12 +61,10 @@ class SandpileModel:
                     self.grid[x, y + 1] += 1
 
                 iteration += 1
-                # Update the data in the image after every 'update_interval' iterations
-                if iteration % self.update_interval == 0:
-                    self.cax.set_data(self.grid)
-                    self.ax.set_title(f"Avalanche in Progress, Size = {self.avalanche_size}")
-                    self.plot_placeholder.pyplot(self.fig)
-                    st.rerun()
+                self.cax.set_data(self.grid)
+                self.ax.set_title(f"Step {self.step + 1}, Avalanche size = {self.avalanche_size}")
+                self.plot_placeholder.pyplot(self.fig)
+                st.rerun()
 
 
     def animate(self):
