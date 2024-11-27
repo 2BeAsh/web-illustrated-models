@@ -4,11 +4,11 @@ import streamlit as st
 from ising_model import IsingModel
 from sine_wave_model import SineWaveModel
 from network import ErdosRenyiNetworkModel
-from sandpile_model import SandpileModel
+# from sandpile_model import SandpileModel
 
 # Model selection
 st.sidebar.header("Select Model")  
-model = st.sidebar.selectbox(label="Choose a model", options=["Sine wave", "Ising", "Erdos-Renyi Network", "Sandpile"])
+model = st.sidebar.selectbox(label="Choose a model", options=["Sine wave", "Ising", "Erdos-Renyi Network",])
 
 
 if model == "Ising":
@@ -23,6 +23,6 @@ elif model == "Erdos-Renyi Network":
     network_model = ErdosRenyiNetworkModel()
     network_model.animate()
     
-elif model == "Sandpile":
-    sandpile_model = SandpileModel()
-    sandpile_model.animate()
+# elif model == "Sandpile":
+#     sandpile_model = SandpileModel()
+#     sandpile_model.animate()
