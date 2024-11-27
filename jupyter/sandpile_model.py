@@ -25,7 +25,7 @@ class SandpileModel:
     
         
     def _initial_grid(self):
-        self.grid = np.random.randint(low=0, high=3, size=(self.N, self.N), dtype=int)
+        self.grid = np.random.randint(low=0, high=self.critical_height + 1, size=(self.N, self.N), dtype=int)
     
 
     def _add_grain(self, x, y):
@@ -52,7 +52,7 @@ class SandpileModel:
 
                 # Update the data in the image after each topple
                 self.cax.set_data(self.grid)
-                self.ax.set_title(f"Avalanche in Progress, Size = {self.avalanche_size}")
+                self.ax.set_title(f"Step {self.step + 1}, Avalanche size = {self.avalanche_size}")
                 self.plot_placeholder.pyplot(self.fig)
                 time.sleep(0.01)
 
@@ -74,7 +74,7 @@ class SandpileModel:
       
         # Run simulation if button is pressed
         if st.button("Play"):
-            for step in range(self.time_steps):
+            for self.step in range(self.time_steps):
                 # Add grain
                 if self.add_location == "Center":
                     self._add_grain(self.N // 2, self.N // 2)
@@ -84,6 +84,6 @@ class SandpileModel:
 
                 # Update the data in the image instead of calling imshow
                 self.cax.set_data(self.grid)
-                self.ax.set_title(f"Step {step + 1}, Avalanche size = {self.avalanche_size}")
+                self.ax.set_title(f"Step {self.step + 1}, Avalanche size = {self.avalanche_size}")
                 self.plot_placeholder.pyplot(self.fig)
                 time.sleep(0.01)  # Small delay to visualize the simulation
