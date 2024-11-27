@@ -54,14 +54,13 @@ class SandpileModel:
         # Initial image and figure setup
         plot_placeholder = st.empty()
         fig, ax = plt.subplots(figsize=(6, 6))
-
-        # Image and Colorbar        
-        cax = ax.imshow(self.grid, cmap="hot", interpolation="nearest")
-        cbar = fig.colorbar(cax, ax=ax, ticks=range(self.critical_height + 1))
+        cmap = plt.cm.colors.ListedColormap(['black', 'red', 'orange', 'yellow', 'white'])
+        cax = ax.imshow(self.grid, cmap=cmap, interpolation="nearest")
+        cbar = fig.colorbar(cax, ax=ax, boundaries=np.arange(-0.5, self.critical_height + 1, 1), ticks=range(self.critical_height + 1))
         cbar.ax.set_yticklabels([str(i) for i in range(self.critical_height + 1)])
-        
+        cbar.set_label('Height')
         plot_placeholder.pyplot(fig)
-        
+      
         # Run simulation if button is pressed
         if st.button("Play"):
             for step in range(self.time_steps):
@@ -74,8 +73,11 @@ class SandpileModel:
 
                 # Plot the current state
                 ax.clear()
-                ax.imshow(self.grid, cmap="hot", interpolation="nearest")
+                cax = ax.imshow(self.grid, cmap=cmap, interpolation="nearest")
+                cbar = fig.colorbar(cax, ax=ax, boundaries=np.arange(-0.5, self.critical_height + 1, 1), ticks=range(self.critical_height + 1))
+                cbar.ax.set_yticklabels([str(i) for i in range(self.critical_height + 1)])
+                cbar.set_label('Height')
                 ax.set_title(f"Step {step + 1}, Avalanche size = {self.avalanche_size}")
                 ax.axis('off')
                 plot_placeholder.pyplot(fig)
-                time.sleep(0.1)  # Small delay to visualize the simulation        
+                time.sleep(0.01)  # Small delay to visualize the simulation
