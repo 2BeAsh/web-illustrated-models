@@ -6,7 +6,6 @@ import time
 class SandpileModel:
     def __init__(self):
         self.critical_height = 4
-        self.avalanche_grid = None  # Track avalanche sizes
     
     
     def _streamlit_setup(self):
@@ -48,6 +47,14 @@ class SandpileModel:
                 if y < self.N - 1:
                     self.grid[x, y + 1] += 1
 
+    
+    def _step(self):
+        if self.add_location == "Center":
+            self._add_grain(self.N // 2, self.N // 2)
+        elif self.add_location == "Random":
+            x, y = np.random.randint(0, self.N, size=2)
+            self._add_grain(x, y)
+
 
     def animate(self):
         # Initialize
@@ -66,29 +73,29 @@ class SandpileModel:
         cbar.set_label('Height')
         plot_placeholder.pyplot(fig)
       
+        # Initial avalanche size image
+        avalanche_placeholder = st.empty()
+        fig_av, ax_av = plt.subplots(figsize=(6, 6))
+        ax_av.set(xticks=[], yticks=[])
+        ax_av.set_title("Avalanche Size Heatmap", fontsize=10)
+        cax_av = ax_av.imshow(self.avalanche_grid, cmap="magma", interpolation="nearest")
+        cbar_av = fig_av.colorbar(cax_av, ax=ax_av)
+        cbar_av.set_label('Number of Topplings')
+        avalanche_placeholder.pyplot(fig_av)
+      
         # Run simulation if button is pressed
         if st.button("Play"):
             for step in range(self.time_steps):
-                # Add grain
-                if self.add_location == "Center":
-                    self._add_grain(self.N // 2, self.N // 2)
-                elif self.add_location == "Random":
-                    x, y = np.random.randint(0, self.N, size=2)
-                    self._add_grain(x, y)
-
+                self._step()    
+                
                 # Update the data in the image 
                 cax.set_data(self.grid)
                 ax.set_title(f"Step {step + 1}", fontsize=10)
                 plot_placeholder.pyplot(fig)
+                
+                # Update avalanche size image
+                cax_av.set_data(self.avalanche_grid)
+                avalanche_placeholder.pyplot(fig_av)
+                
                 time.sleep(0.1)  # Small delay to visualize the simulation
 
-        # Show avalanche size heatmap
-        if st.button("Show Avalanche Sizes"):
-            avalanche_placeholder = st.empty()
-            fig, ax = plt.subplots(figsize=(6, 6))
-            ax.set(xticks=[], yticks=[])
-            ax.set_title("Avalanche Size Heatmap", fontsize=10)
-            avalanche_cax = ax.imshow(self.avalanche_grid, cmap="hot", interpolation="nearest")
-            cbar = fig.colorbar(avalanche_cax, ax=ax)
-            cbar.set_label('Number of Topplings')
-            avalanche_placeholder.pyplot(fig)
