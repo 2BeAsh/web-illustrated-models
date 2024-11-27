@@ -26,7 +26,7 @@ class SandpileModel:
 
     def _add_grain(self, x, y):
         self.grid[x, y] += 1
-        self.topple()
+        self._topple()
 
 
     def _topple(self):
@@ -44,9 +44,11 @@ class SandpileModel:
                     self.grid[x, y + 1] += 1
 
 
-    
-
     def animate(self):
+        # Initialize
+        self._streamlit_setup()
+        self._initial_grid()
+        
         # Initial image and figure setup
         plot_placeholder = st.empty()
         fig, ax = plt.subplots(figsize=(6, 6))
