@@ -27,10 +27,10 @@ class SandpileModel:
     
         if st.button("Play"):
             self.running = True
-            st.experimental_rerun()
+            st.rerun()
         if st.button("Stop"):
             self.running = False
-            st.experimental_rerun()
+            st.rerun()
     
         
     def _initial_grid(self):
@@ -66,7 +66,7 @@ class SandpileModel:
                     self.cax.set_data(self.grid)
                     self.ax.set_title(f"Avalanche in Progress, Size = {self.avalanche_size}")
                     self.plot_placeholder.pyplot(self.fig)
-                    st.experimental_rerun()
+                    st.rerun()
 
 
     def animate(self):
@@ -103,7 +103,5 @@ class SandpileModel:
                 self.ax.set_title(f"Step {self.step + 1}, Avalanche size = {self.avalanche_size}")
                 self.plot_placeholder.pyplot(self.fig)
                 self.step += 1
-                st.experimental_rerun()
-
-# Run the application
+                st.rerun()
 
