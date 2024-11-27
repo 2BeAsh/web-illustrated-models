@@ -27,12 +27,18 @@ class SandpileModel():
         self.ax.set_title("Initial State", fontsize=10)
         self.ax.set_xticks([])
         self.ax.set_yticks([])
+        
+        # Add colorbar to show the height of each color
+        cbar = self.fig.colorbar(self.img, ax=self.ax, orientation='vertical')
+        cbar.set_label('Height', fontsize=10)
+        
         self.plot_placeholder.pyplot(self.fig)
+        
+        
 
     
     def _initialize_grid(self):
-        # self.grid = np.random.randint(low=0, high=3, size=(self.N, self.N))
-        self.grid = 3 * np.ones((self.N, self.N))
+        self.grid = np.random.randint(low=0, high=3, size=(self.N, self.N))
     
     
     def _add_grain_random(self, step):    
