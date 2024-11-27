@@ -6,6 +6,10 @@ import time
 class SandpileModel:
     def __init__(self):
         self.critical_height = 4
+        self.fig = None
+        self.ax = None
+        self.cax = None
+        self.plot_placeholder = None
     
     
     def _streamlit_setup(self):
@@ -21,7 +25,7 @@ class SandpileModel:
     
         
     def _initial_grid(self):
-        self.grid = np.random.randint(low=0, high=self.critical_height+1, size=(self.N, self.N), dtype=int)
+        self.grid = np.random.randint(low=0, high=3, size=(self.N, self.N), dtype=int)
     
 
     def _add_grain(self, x, y):
@@ -30,8 +34,8 @@ class SandpileModel:
 
 
     def _topple(self):
-
         self.avalanche_size = 0
+
         while np.any(self.grid >= self.critical_height):
             unstable_sites = np.argwhere(self.grid >= self.critical_height)
             for x, y in unstable_sites:
@@ -46,12 +50,11 @@ class SandpileModel:
                 if y < self.N - 1:
                     self.grid[x, y + 1] += 1
 
-            # Update the data in the image after each topple
-            self.cax.set_data(self.grid)
-            self.ax.set_title(f"Avalanche in Progress, Size = {self.avalanche_size}")
-            self.plot_placeholder.pyplot(self.fig)
-            time.sleep(0.01)
-
+                # Update the data in the image after each topple
+                self.cax.set_data(self.grid)
+                self.ax.set_title(f"Avalanche in Progress, Size = {self.avalanche_size}")
+                self.plot_placeholder.pyplot(self.fig)
+                time.sleep(0.01)
 
 
     def animate(self):
@@ -65,7 +68,7 @@ class SandpileModel:
         cmap = plt.cm.colors.ListedColormap(['black', 'red', 'orange', 'yellow', 'white'])
         self.cax = self.ax.imshow(self.grid, cmap=cmap, interpolation="nearest")
         cbar = self.fig.colorbar(self.cax, ax=self.ax, boundaries=np.arange(-0.5, self.critical_height + 1, 1), ticks=range(self.critical_height + 1))
-        cbar.self.ax.set_yticklabels([str(i) for i in range(self.critical_height + 1)])
+        cbar.ax.set_yticklabels([str(i) for i in range(self.critical_height + 1)])
         cbar.set_label('Height')
         self.plot_placeholder.pyplot(self.fig)
       
