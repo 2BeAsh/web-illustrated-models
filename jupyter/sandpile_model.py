@@ -79,7 +79,7 @@ class SandpileModel:
         fig_av, ax_av = plt.subplots(figsize=(6, 6))
         ax_av.set(xticks=[], yticks=[])
         ax_av.set_title("Avalanche Size Heatmap", fontsize=10)
-        cax_av = ax_av.imshow(self.avalanche_grid, cmap="magma", interpolation="nearest", vmin=0, vmax=100)
+        cax_av = ax_av.imshow(self.avalanche_grid, cmap="magma", interpolation="nearest", vmin=0, vmax=10)
         cbar_av = fig_av.colorbar(cax_av, ax=ax_av)
         cbar_av.set_label('Number of Topplings')
         avalanche_placeholder.pyplot(fig_av)
