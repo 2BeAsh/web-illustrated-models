@@ -78,7 +78,7 @@ class SandpileModel:
         # Avalanche size heatmap plot
         ax2.set(xticks=[], yticks=[])
         ax2.set_title("Avalanche Size Heatmap", fontsize=10)
-        cmap_avalanche = plt.cm.colors.ListedColormap(['black', 'purple', 'blue', 'green', 'yellow', 'red'])
+        cmap_avalanche = plt.cm.colors.ListedColormap(['black', 'purple', 'blue', 'red', 'orange', 'yellow'])
         cax2 = ax2.imshow(self.avalanche_grid, cmap=cmap_avalanche, interpolation="nearest", vmin=0, vmax=5)
         cbar2 = fig.colorbar(cax2, ax=ax2, boundaries=np.arange(-0.5, 6, 1), ticks=range(6))
         cbar2.ax.set_yticklabels([str(i) for i in range(6)])
