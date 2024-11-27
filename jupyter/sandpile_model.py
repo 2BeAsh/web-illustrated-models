@@ -54,9 +54,14 @@ class SandpileModel:
         # Initial image and figure setup
         plot_placeholder = st.empty()
         fig, ax = plt.subplots(figsize=(6, 6))
-        ax.imshow(self.grid, cmap="hot", interpolation="nearest")         
+
+        # Image and Colorbar        
+        cax = ax.imshow(self.grid, cmap="hot", interpolation="nearest")
+        cbar = fig.colorbar(cax, ax=ax, ticks=range(self.critical_height + 1))
+        cbar.ax.set_yticklabels([str(i) for i in range(self.critical_height + 1)])
+        
         plot_placeholder.pyplot(fig)
-      
+        
         # Run simulation if button is pressed
         if st.button("Play"):
             for step in range(self.time_steps):
