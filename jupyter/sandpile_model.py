@@ -6,6 +6,7 @@ import time
 class SandpileModel:
     def __init__(self):
         self.critical_height = 4
+        self.avalanche_grid = None  # Track avalanche sizes
     
     
     def _streamlit_setup(self):
@@ -22,6 +23,7 @@ class SandpileModel:
         
     def _initial_grid(self):
         self.grid = np.random.randint(low=0, high=self.critical_height+1, size=(self.N, self.N), dtype=int)
+        self.avalanche_grid = np.zeros((self.N, self.N), dtype=int)  # Initialize avalanche grid
     
 
     def _add_grain(self, x, y):
@@ -35,6 +37,7 @@ class SandpileModel:
             unstable_sites = np.argwhere(self.grid >= self.critical_height)
             for x, y in unstable_sites:
                 self.avalanche_size += 1
+                self.avalanche_grid[x, y] += 1  # Track toppling events
                 self.grid[x, y] -= 4
                 if x > 0:
                     self.grid[x - 1, y] += 1
@@ -54,6 +57,8 @@ class SandpileModel:
         # Initial image and figure setup
         plot_placeholder = st.empty()
         fig, ax = plt.subplots(figsize=(6, 6))
+        ax.set(xticks=[], yticks=[])
+        ax.set_title("Initial state", fontsize=10)
         cmap = plt.cm.colors.ListedColormap(['black', 'red', 'orange', 'yellow', 'white'])
         cax = ax.imshow(self.grid, cmap=cmap, interpolation="nearest")
         cbar = fig.colorbar(cax, ax=ax, boundaries=np.arange(-0.5, self.critical_height + 1, 1), ticks=range(self.critical_height + 1))
@@ -73,6 +78,17 @@ class SandpileModel:
 
                 # Update the data in the image 
                 cax.set_data(self.grid)
-                ax.set_title(f"Step {step + 1}")
+                ax.set_title(f"Step {step + 1}", fontsize=10)
                 plot_placeholder.pyplot(fig)
-                time.sleep(0.25)  # Small delay to visualize the simulation
+                time.sleep(0.1)  # Small delay to visualize the simulation
+
+        # Show avalanche size heatmap
+        if st.button("Show Avalanche Sizes"):
+            avalanche_placeholder = st.empty()
+            fig, ax = plt.subplots(figsize=(6, 6))
+            ax.set(xticks=[], yticks=[])
+            ax.set_title("Avalanche Size Heatmap", fontsize=10)
+            avalanche_cax = ax.imshow(self.avalanche_grid, cmap="hot", interpolation="nearest")
+            cbar = fig.colorbar(avalanche_cax, ax=ax)
+            cbar.set_label('Number of Topplings')
+            avalanche_placeholder.pyplot(fig)
