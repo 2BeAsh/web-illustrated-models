@@ -53,6 +53,15 @@ class SandpileModel():
         self._append_fig(step)
     
     
+    def _determine_add_grain_function(self):
+        if self.grain_add_location == "Random":
+            self._add_grain = self._add_grain_random
+        elif self.grain_add_location == "Center":
+            self._add_grain = self.add_grain_center
+        elif self.grain_add_location == "Top left corner":
+            self._add_grain = self.add_grain_top_left_corner
+    
+    
     def _topple(self, step):
         """Topple the grid if any site has more grains than the critical height"""
         while np.any(self.grid >= self.critical_height):
@@ -83,19 +92,12 @@ class SandpileModel():
         time.sleep(0.05)
     
             
-    def animate(self):
-        # Determine the grain adding function based on user input
-        if self.grain_add_location == "Random":
-            self._add_grain = self._add_grain_random
-        elif self.grain_add_location == "Center":
-            self._add_grain = self.add_grain_center
-        elif self.grain_add_location == "Top left corner":
-            self._add_grain = self.add_grain_top_left_corner
-        
+    def animate(self):        
         self._streamlit_setup()
         self._initialize_grid()
         self._initial_image()
-        
+        self._determine_add_grain_function()
+
         if st.button("Play"):
             for step in range(self.time_steps):
                 self._add_grain(step)
