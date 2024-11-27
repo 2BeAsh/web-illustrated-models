@@ -54,7 +54,7 @@ class SandpileModel:
                 self.cax.set_data(self.grid)
                 self.ax.set_title(f"Step {self.step + 1}, Avalanche size = {self.avalanche_size}")
                 self.plot_placeholder.pyplot(self.fig)
-                time.sleep(0.01)
+                time.sleep(0.5)
 
 
     def animate(self):
