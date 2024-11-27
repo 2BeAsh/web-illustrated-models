@@ -79,7 +79,7 @@ class SandpileModel:
         fig_av, ax_av = plt.subplots(figsize=(6, 6))
         ax_av.set(xticks=[], yticks=[])
         ax_av.set_title("Avalanche Size Heatmap", fontsize=10)
-        cax_av = ax_av.imshow(self.avalanche_grid, cmap="magma", interpolation="nearest", vmin=0, vmax=100)
+        cax_av = ax_av.imshow(self.avalanche_grid, cmap="magma", interpolation="nearest", vmin=0, vmax=4)
         cbar_av = fig_av.colorbar(cax_av, ax=ax_av)
         cbar_av.set_label('Number of Topplings')
         avalanche_placeholder.pyplot(fig_av)
@@ -100,7 +100,7 @@ class SandpileModel:
                 current_max_topplings = np.max(self.avalanche_grid)
                 if current_max_topplings > max_topplings:
                     max_topplings = current_max_topplings
-                    cax_av.set_clim(vmin=0, vmax=max(100, max_topplings))  # Update vmax for color range
+                    cax_av.set_clim(vmin=0, vmax=max(4, max_topplings))  # Update vmax for color range
 
                 cax_av.set_data(self.avalanche_grid)
                 avalanche_placeholder.pyplot(fig_av)
