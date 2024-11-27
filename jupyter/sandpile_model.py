@@ -32,7 +32,7 @@ class SandpileModel():
 
     
     def _initialize_grid(self):
-        self.grid = np.random.randint(low=0, high=self.critical_height, size=(self.N, self.N))
+        self.grid = np.random.randint(low=0, high=self.critical_height-1, size=(self.N, self.N))
     
     
     def _add_grain_random(self, step):    
@@ -65,27 +65,27 @@ class SandpileModel():
     def _topple(self, step):
         """Topple the grid if any site has more grains than the critical height"""
         avalanche_size = 0
-        while np.any(self.grid >= self.critical_height):
-            # Find the site with more grains than the critical height
-            x, y = np.where(self.grid >= self.critical_height)
             
-            # Topple the site taking boundary conditions into account
-            # Boundary conditions: Ignore any grains that would fall off the grid
-            x_minus_one = x[x - 1 > 0]
-            x_plus_one = x[x + 1 < self.N]
-            y_minus_one = y[y - 1 > 0]
-            y_plus_one = y[y + 1 < self.N]
-
-            self.grid[x, y] -= 4
-            self.grid[x_minus_one, y] += 1
-            self.grid[x_plus_one, y] += 1
-            self.grid[x, y_minus_one] += 1
-            self.grid[x, y_plus_one] += 1
+        
+        while np.any(self.grid > self.critical_height):
+            unstable_sites = np.argwhere(self.grid > self.critical_height)
             
-            avalanche_size += 1
+            for x, y in unstable_sites:
+                self.grid[x, y] -= self.critical_height
+                if x > 0:
+                    self.grid[x - 1, y] += 1
+                if x < self.N - 1:
+                    self.grid[x + 1, y] += 1
+                if y > 0:
+                    self.grid[x, y - 1] += 1
+                if y < self.N - 1:
+                    self.grid[x, y + 1] += 1
+                
+                avalanche_size += 1
             
             # Append current grid to list of figures
             self._append_fig(step, avalanche_size)
+            time.sleep(0.05)
     
     
     def _append_fig(self, step, avalanche_size=0):
