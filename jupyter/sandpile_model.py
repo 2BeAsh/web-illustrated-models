@@ -16,6 +16,7 @@ class SandpileModel():
         self.N = st.sidebar.slider("Grid size (N)", min_value=5, max_value=100, value=50, step=5)
         self.critical_height = st.sidebar.slider("Critical height", min_value=1, max_value=10, value=4, step=1)
         self.time_steps = st.sidebar.number_input("Time steps", min_value=1, max_value=1000, value=100, step=10)
+        self.grain_add_location = st.sidebar.radio("Where are grains added?", ["Random", "Center", "Top left corner"])
         
 
     def _initial_image(self):
@@ -35,9 +36,21 @@ class SandpileModel():
         self.grid = np.random.randint(low=0, high=self.critical_height, size=(self.N, self.N))
     
     
-    def _add_grain(self, step):    
-        # Add grain randomly
+    def _add_grain_random(self, step):    
+        """Add grain randomly"""
         self.grid[np.random.randint(0, self.N), np.random.randint(0, self.N)] += 1
+        self._append_fig(step)
+    
+    
+    def add_grain_center(self, step):
+        """Add grain to the center of the grid"""
+        self.grid[self.N // 2, self.N // 2] += 1
+        self._append_fig(step)
+    
+    
+    def add_grain_top_left_corner(self, step):
+        """Add grain to the top left corner of the grid"""
+        self.grid[0, 0] += 1
         self._append_fig(step)
     
     
@@ -73,6 +86,14 @@ class SandpileModel():
     
             
     def animate(self):
+        # Determine the grain adding function based on user input
+        if self.grain_add_location == "Random":
+            self._add_grain = self._add_grain_random
+        elif self.grain_add_location == "Center":
+            self._add_grain = self.add_grain_center
+        elif self.grain_add_location == "Top left corner":
+            self._add_grain = self.add_grain_top_left_corner
+        
         self._streamlit_setup()
         self._initialize_grid()
         self._initial_image()
