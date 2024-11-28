@@ -28,7 +28,7 @@ class LichenModel:
         Also create the interaction network between the species.
         """
         self.lichen = np.random.randint(low=0, high=10, size=(self.L, self.L))  # Pick 10 random species initially
-        self.interaction_network = nx.erdos_renyi_graph(n=self._number_of_species, p=self.gamma, directed=True)
+        self.interaction_network = nx.erdos_renyi_graph(n=self._number_of_species(), p=self.gamma, directed=True)
     
     
     def _new_species(self):
@@ -57,21 +57,25 @@ class LichenModel:
                     self.interaction_network.add_edge(node, new_species_value)
     
     
+    def _get_neighbors(self, x, y):
+        neighbors = []
+        if x > 0:
+            neighbors.append((x - 1, y))
+        if x < self.N - 1:
+            neighbors.append((x + 1, y))
+        if y > 0:
+            neighbors.append((x, y - 1))
+        if y < self.N - 1:
+            neighbors.append((x, y + 1))
+        return neighbors
+    
+    
     def _invade(self):
         # Pick random site and one of its neighbours.
         idx_picked = np.random.randint(low=0, high=self.L, size=2)
         x, y = idx_picked
         # The neighbour must take closed boundary conditions into account
-        possible_nbors = []
-        if x > 0:
-            possible_nbors.append((x-1, y))
-        if x < self.L-1:
-            possible_nbors.append((x+1, y))
-        if y > 0:
-            possible_nbors.append((x, y-1))
-        if y < self.L-1:
-            possible_nbors.append((x, y+1))
-            
+        possible_nbors = self._get_neighbors(x, y)
         x_nbor, y_nbor = possible_nbors[np.random.randint(low=0, high=len(possible_nbors))]
         
         # Check if the picked site can invade the neighbour from interaction_network
