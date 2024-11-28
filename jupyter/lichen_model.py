@@ -1,7 +1,18 @@
-import numpy as np
 import streamlit as st
+import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
+
+
+
+        
+    
+
+    
+    
+
+                
+    
 
 
 class LichenModel:
@@ -17,20 +28,20 @@ class LichenModel:
         self.alpha = st.sidebar.slider("Evolve rate", min_value=0.0, max_value=1.0, value=0.1, step=0.025)
         self.gamma = st.sidebar.slider("Interaction probability", min_value=0.0, max_value=1.0, value=0.1, step=0.025)
         self.time_steps = st.sidebar.number_input("Time steps", min_value=1, max_value=1000, value=100, step=10)
-        
+    
     
     def _number_of_species(self):
         return np.unique(self.lichen).size
     
     
     def _initialize_grid(self):
-        """Create an LxL grid keeping track of the Lichen species. Initially, 10 species are present. 
+        """Create an LxL grid keeping track of the Lichen species. Initially, 5 species are present. 
         Also create the interaction network between the species.
         """
-        self.lichen = np.random.randint(low=0, high=10, size=(self.L, self.L))  # Pick 10 random species initially
+        self.lichen = np.random.randint(low=0, high=5, size=(self.L, self.L))  # Pick 5 random species initially
         self.interaction_network = nx.erdos_renyi_graph(n=self._number_of_species(), p=self.gamma, directed=True)
     
-    
+        
     def _new_species(self):
         """With probability alpha * gamma / L**2, choose a random point on the grid.
         The point is given a value of the number of species, to ensure it is not equal to existing species' values.
@@ -68,7 +79,7 @@ class LichenModel:
         if y < self.L - 1:
             neighbors.append((x, y + 1))
         return neighbors
-    
+
     
     def _invade(self):
         # Pick random site and one of its neighbours.
@@ -84,32 +95,65 @@ class LichenModel:
                 
     
     def _lichen_step(self):
-        """In each time step, pick a random site and a neighbour. If the chosen site kan invade the neighbour, it does so.
+        """In each time step, pick a random site and a neighbour. If the chosen site can invade the neighbour, it does so.
         Also pick a random site with probability alpha * gamma / N to create a new species on.
         """
         self._invade()
         self._new_species()
         
-        
+    
     def _initial_image(self):
         self.plot_placeholder = st.empty()
 
         # Display initial grid state
-        self.fig, self.ax = plt.subplots(figsize=(6, 6))
-        self.img = self.ax.imshow(self.lichen, cmap='tab10', interpolation='nearest')
-        self.ax.set_xticks([])
-        self.ax.set_yticks([])
-        self.ax.set_title("Initial State", fontsize=10)
+        self.fig, (self.ax1, self.ax2) = plt.subplots(1, 2, figsize=(12, 6))
+        self.img = self.ax1.imshow(self.lichen, cmap='tab10', interpolation='nearest')
+        self.ax1.set_xticks([])
+        self.ax1.set_yticks([])
+        self.ax1.set_title("Initial State", fontsize=10)
+        
+        # Initial network visualization
+        self._update_network_plot()
         self.plot_placeholder.pyplot(self.fig)
         
     
+    def _update_network_plot(self):
+        self.ax2.clear()
+        pos = nx.spring_layout(self.interaction_network)
+        
+        # Draw nodes, with size representing population size
+        species_sizes = [np.sum(self.lichen == node) * 20 for node in self.interaction_network.nodes()]
+        nx.draw_networkx_nodes(self.interaction_network, pos, ax=self.ax2, node_size=species_sizes, node_color='blue')
+        
+        # Draw active (green) and potential (grey) interactions
+        active_edges = []
+        potential_edges = []
+        for u, v in self.interaction_network.edges():
+            if np.any((self.lichen == u) & (np.roll(self.lichen, 1, axis=0) == v)) or \
+               np.any((self.lichen == u) & (np.roll(self.lichen, -1, axis=0) == v)) or \
+               np.any((self.lichen == u) & (np.roll(self.lichen, 1, axis=1) == v)) or \
+               np.any((self.lichen == u) & (np.roll(self.lichen, -1, axis=1) == v)):
+                active_edges.append((u, v))
+            else:
+                potential_edges.append((u, v))
+        
+        nx.draw_networkx_edges(self.interaction_network, pos, ax=self.ax2, edgelist=active_edges, edge_color='green', width=2)
+        nx.draw_networkx_edges(self.interaction_network, pos, ax=self.ax2, edgelist=potential_edges, edge_color='grey', style='dashed')
+        
+        self.ax2.set_title("Interaction Network", fontsize=10)
+    
+    
     def _append_fig(self, step):
+        # Update the grid state
         self.img.set_data(self.lichen)
-        self.ax.set_title(f"Step {step + 1}", fontsize=10)
+        self.ax1.set_title(f"Step {step + 1}", fontsize=10)
+        
+        # Update the network state
+        self._update_network_plot()
+        
         self.plot_placeholder.pyplot(self.fig)
-        plt.pause(0.05)
         
-        
+    
     def animate(self):
         self._streamlit_setup()
         self._initialize_grid()
