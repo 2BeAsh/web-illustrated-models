@@ -4,17 +4,6 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 
-
-        
-    
-
-    
-    
-
-                
-    
-
-
 class LichenModel:
     def __init__(self):
         pass
@@ -38,7 +27,10 @@ class LichenModel:
         """Create an LxL grid keeping track of the Lichen species. Initially, 5 species are present. 
         Also create the interaction network between the species.
         """
-        self.lichen = np.random.randint(low=0, high=5, size=(self.L, self.L))  # Pick 5 random species initially
+        # self.lichen = np.random.randint(low=0, high=3, size=(self.L, self.L))  # Pick 3 random species initially
+        self.lichen = np.zeros(shape=(self.L, self.L), dtype=int)
+        self.lichen[:5, :5] = 1
+        self.lichen[-5:, -5:] = 2
         self.interaction_network = nx.erdos_renyi_graph(n=self._number_of_species(), p=self.gamma, directed=True)
     
         
@@ -100,6 +92,45 @@ class LichenModel:
         """
         self._invade()
         self._new_species()
+        
+        
+    def _identify_active_interactions(self):
+        """An interaction between two species is active if they are adjacent in the grid, and inactive if they are not.
+        Find all species which border another species, which are potentials for an active interaction. 
+        Then go through all edges and see if they are in the set of active edges.
+        """
+
+        # Step 1: Prepare to find neighboring pairs
+        active_edges = set()
+        
+        # Step 2: Find neighbors for all cells using Numpy slicing
+        for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+            rolled_grid = np.roll(self.lichen, shift=dx, axis=0)
+            rolled_grid = np.roll(rolled_grid, shift=dy, axis=1)
+
+            # Mask to find cells where neighboring species are different
+            neighbor_mask = (self.lichen != rolled_grid)
+
+            # Find locations where species are different and add the pairs as active edges
+            unique_pairs = set(zip(self.lichen[neighbor_mask].flatten(), rolled_grid[neighbor_mask].flatten()))
+
+            # Ensure the species value pair (a, b) is ordered to prevent duplicate representation (b, a)
+            for pair in unique_pairs:
+                active_edges.add(tuple(sorted(pair)))
+        
+        # Step 3: Identify active and inactive interactions in the network
+        active_in_network = []
+        inactive_in_network = []
+
+        # Loop through all edges in the network and classify as active or inactive
+        for u, v in self.interaction_network.edges():
+            interaction = tuple(sorted((u, v)))
+            if interaction in active_edges:
+                active_in_network.append((u, v))
+            else:
+                inactive_in_network.append((u, v))
+
+        return active_in_network, inactive_in_network
         
     
     def _initial_image(self):
