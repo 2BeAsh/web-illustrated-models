@@ -61,11 +61,11 @@ class LichenModel:
         neighbors = []
         if x > 0:
             neighbors.append((x - 1, y))
-        if x < self.N - 1:
+        if x < self.L - 1:
             neighbors.append((x + 1, y))
         if y > 0:
             neighbors.append((x, y - 1))
-        if y < self.N - 1:
+        if y < self.L - 1:
             neighbors.append((x, y + 1))
         return neighbors
     
