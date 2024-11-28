@@ -144,9 +144,10 @@ class LichenModel:
         # Use fixed positions for nodes
         pos = self.node_positions
         
-        # Draw nodes, all with the same color, but with labels indicating species number
+        # Draw nodes with colors matching the grid plot
         species_sizes = [np.sum(self.lichen == node) * 20 for node in self.interaction_network.nodes()]
-        nx.draw_networkx_nodes(self.interaction_network, pos, ax=self.ax2, node_size=species_sizes, node_color='blue')
+        species_colors = [self.color_map[node] for node in self.interaction_network.nodes()]
+        nx.draw_networkx_nodes(self.interaction_network, pos, ax=self.ax2, node_size=species_sizes, node_color=species_colors)
         nx.draw_networkx_labels(self.interaction_network, pos, labels={node: str(node) for node in self.interaction_network.nodes()}, ax=self.ax2, font_size=10, font_color='white')
         
         # Draw active (green) and potential (grey) interactions
@@ -163,10 +164,6 @@ class LichenModel:
         
         nx.draw_networkx_edges(self.interaction_network, pos, ax=self.ax2, edgelist=active_edges, edge_color='green', width=2)
         nx.draw_networkx_edges(self.interaction_network, pos, ax=self.ax2, edgelist=potential_edges, edge_color='grey', style='dashed')
-        
-        # Add a legend for species colors
-        handles = [plt.Line2D([0], [0], marker='o', color='w', markerfacecolor=self.color_map[i], markersize=10, label=f'Species {i}') for i in sorted(self.color_map.keys())]
-        self.ax2.legend(handles=handles, loc='upper right', title="Species Legend")
         
         self.ax2.set_title("Interaction Network", fontsize=10)
     
