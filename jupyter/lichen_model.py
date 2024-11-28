@@ -37,9 +37,9 @@ class LichenModel:
         
         # Assign unique colors to each species
         unique_species = np.unique(self.lichen)
-        cmap = plt.get_cmap('tab10')
+        cmap = plt.get_cmap('tab20')
         for i, species in enumerate(unique_species):
-            self.color_map[species] = cmap(i % 10)
+            self.color_map[species] = cmap(i % 20)
         self._update_colormap()
     
     
@@ -71,8 +71,10 @@ class LichenModel:
             self.lichen[x, y] = new_species_value
             
             # Assign a new color for the new species
-            cmap = plt.get_cmap('tab10')
-            self.color_map[new_species_value] = cmap(new_species_value % 10)
+            cmap = plt.get_cmap('tab20')
+            print(self.color_map)
+            self.color_map[new_species_value] = cmap(new_species_value % 20)
+            print(self.color_map)
             
             # Update the colormap for the grid plot
             self._update_colormap()
