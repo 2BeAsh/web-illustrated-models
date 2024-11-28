@@ -40,15 +40,25 @@ class LichenModel:
         cmap = plt.get_cmap('tab10')
         for i, species in enumerate(unique_species):
             self.color_map[species] = cmap(i % 10)
+        self._update_colormap()
     
-        
+    
+    def _update_colormap(self):
+        """Update the ListedColormap for the grid plot."""
+        cmap = mcolors.ListedColormap([self.color_map[i] for i in sorted(self.color_map.keys())])
+        if hasattr(self, 'img'):
+            self.img.set_cmap(cmap)
+        else:
+            self.current_cmap = cmap
+    
+    
     def _new_species(self):
         """With probability alpha * gamma / L**2, choose a random point on the grid.
         The point is given a value of the number of species, to ensure it is not equal to existing species' values.
         Then create a new node in the interaction network and potentially connect it to existing nodes, and all existing nodes to it.
         Always connect it to the node of the species that was at the site before it spawned.            
         """
-        if np.random.uniform() < 0.1: # self.alpha * self.gamma / self.L**2:
+        if np.random.uniform() < self.alpha * self.gamma / self.L**2:
             # Find the site to spawn the new species on, and its value
             x, y = np.random.randint(low=0, high=self.L, size=2)
             new_species_value = np.max(self.lichen) + 1
@@ -64,8 +74,8 @@ class LichenModel:
             cmap = plt.get_cmap('tab10')
             self.color_map[new_species_value] = cmap(len(self.color_map) % 10)
             
-            # Update the ListedColormap for the grid plot
-            self.img.set_cmap(mcolors.ListedColormap([self.color_map[i] for i in sorted(self.color_map.keys())]))
+            # Update the colormap for the grid plot
+            self._update_colormap()
             
             # For each other species, check if both the new species can invade that species and vice versa
             for node in self.interaction_network.nodes():
@@ -117,7 +127,7 @@ class LichenModel:
 
         # Display initial grid state
         self.fig, (self.ax1, self.ax2) = plt.subplots(1, 2, figsize=(12, 6))
-        self.img = self.ax1.imshow(self.lichen, cmap=mcolors.ListedColormap([self.color_map[i] for i in sorted(self.color_map.keys())]), interpolation='nearest')
+        self.img = self.ax1.imshow(self.lichen, cmap=self.current_cmap, interpolation='nearest')
         self.ax1.set_xticks([])
         self.ax1.set_yticks([])
         self.ax1.set_title("Initial State", fontsize=10)
