@@ -61,7 +61,7 @@ class LichenModel:
         if np.random.uniform() < self.alpha * self.gamma / self.L**2:
             # Find the site to spawn the new species on, and its value
             x, y = np.random.randint(low=0, high=self.L, size=2)
-            new_species_value = np.max(self.lichen) + 1
+            new_species_value = len(self.color_map)  # Assign a new unique value for the new species
 
             # Add the new species to the interaction network and connect it to the species that was at the site before it spawned
             self.interaction_network.add_node(new_species_value)            
@@ -72,17 +72,18 @@ class LichenModel:
             
             # Assign a new color for the new species
             cmap = plt.get_cmap('tab10')
-            self.color_map[new_species_value] = cmap(len(self.color_map) % 10)
+            self.color_map[new_species_value] = cmap(new_species_value % 10)
             
             # Update the colormap for the grid plot
             self._update_colormap()
             
             # For each other species, check if both the new species can invade that species and vice versa
             for node in self.interaction_network.nodes():
-                if np.random.uniform() < self.gamma:
-                    self.interaction_network.add_edge(new_species_value, node)
-                if np.random.uniform() < self.gamma:
-                    self.interaction_network.add_edge(node, new_species_value)
+                if node != new_species_value:  # Avoid self-loop
+                    if np.random.uniform() < self.gamma:
+                        self.interaction_network.add_edge(new_species_value, node)
+                    if np.random.uniform() < self.gamma:
+                        self.interaction_network.add_edge(node, new_species_value)
             
             # Update positions to include the new node
             self.node_positions = nx.spring_layout(self.interaction_network, pos=self.node_positions, fixed=self.node_positions.keys())
