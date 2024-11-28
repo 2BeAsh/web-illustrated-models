@@ -2,11 +2,13 @@ import streamlit as st
 import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 
 
 class LichenModel:
     def __init__(self):
         self.node_positions = None  # To store fixed positions of nodes
+        self.color_map = None  # To store colors for species
     
     
     def _streamlit_setup(self):
@@ -33,6 +35,11 @@ class LichenModel:
         self.lichen[-5:, -5:] = 2
         self.interaction_network = nx.erdos_renyi_graph(n=self._number_of_species(), p=self.gamma, directed=True)
         self.node_positions = nx.spring_layout(self.interaction_network)  # Initialize node positions
+        
+        # Assign unique colors to each species
+        unique_species = np.unique(self.lichen)
+        cmap = plt.get_cmap('tab10')
+        self.color_map = {species: cmap(i % 10) for i, species in enumerate(unique_species)}
     
         
     def _new_species(self):
@@ -52,6 +59,10 @@ class LichenModel:
             
             # Update the grid to contain the new species
             self.lichen[x, y] = new_species_value
+            
+            # Assign a new color for the new species
+            cmap = plt.get_cmap('tab10')
+            self.color_map[new_species_value] = cmap(new_species_value % 10)
             
             # For each other species, check if both the new species can invade that species and vice versa
             for node in self.interaction_network.nodes():
@@ -142,7 +153,7 @@ class LichenModel:
 
         # Display initial grid state
         self.fig, (self.ax1, self.ax2) = plt.subplots(1, 2, figsize=(12, 6))
-        self.img = self.ax1.imshow(self.lichen, cmap='tab10', interpolation='nearest')
+        self.img = self.ax1.imshow(self.lichen, cmap=mcolors.ListedColormap([self.color_map[i] for i in sorted(self.color_map.keys())]), interpolation='nearest')
         self.ax1.set_xticks([])
         self.ax1.set_yticks([])
         self.ax1.set_title("Initial State", fontsize=10)
@@ -158,9 +169,10 @@ class LichenModel:
         # Use fixed positions for nodes
         pos = self.node_positions
         
-        # Draw nodes, with size representing population size
+        # Draw nodes, with size representing population size and matching colors to the grid
         species_sizes = [np.sum(self.lichen == node) * 20 for node in self.interaction_network.nodes()]
-        nx.draw_networkx_nodes(self.interaction_network, pos, ax=self.ax2, node_size=species_sizes, node_color='blue')
+        species_colors = [self.color_map[node] for node in self.interaction_network.nodes()]
+        nx.draw_networkx_nodes(self.interaction_network, pos, ax=self.ax2, node_size=species_sizes, node_color=species_colors)
         
         # Draw active (green) and potential (grey) interactions
         active_edges = []
