@@ -8,7 +8,7 @@ import matplotlib.colors as mcolors
 class LichenModel:
     def __init__(self):
         self.node_positions = None  # To store fixed positions of nodes
-        self.color_map = {}  # To store colors for species
+        self.color_list = ["red", "blue", "green", "yellow", "purple", "orange", "brown", "pink", "grey", "cyan"]
     
     
     def _streamlit_setup(self):
@@ -19,6 +19,7 @@ class LichenModel:
         self.alpha = st.sidebar.slider("Evolve rate", min_value=0.0, max_value=1.0, value=0.1, step=0.025)
         self.gamma = st.sidebar.slider("Interaction probability", min_value=0.0, max_value=1.0, value=0.1, step=0.025)
         self.time_steps = st.sidebar.number_input("Time steps", min_value=1, max_value=1000, value=100, step=10)
+        self.refresh_rate = st.sidebar.slider("Steps per update", min_value=1, max_value=100, value=10, step=1)
     
     
     def _number_of_species(self):
@@ -35,22 +36,8 @@ class LichenModel:
         self.interaction_network = nx.erdos_renyi_graph(n=self._number_of_species(), p=self.gamma, directed=True)
         self.node_positions = nx.spring_layout(self.interaction_network)  # Initialize node positions
         
-        # Assign unique colors to each species
-        unique_species = np.unique(self.lichen)
-        cmap = plt.get_cmap('tab20')
-        for i, species in enumerate(unique_species):
-            self.color_map[species] = cmap(i % 20)
-        self._update_colormap()
-    
-    
-    def _update_colormap(self):
-        """Update the ListedColormap for the grid plot."""
-        cmap = mcolors.ListedColormap([self.color_map[i] for i in sorted(self.color_map.keys())])
-        if hasattr(self, 'img'):
-            self.img.set_cmap(cmap)
-        else:
-            self.current_cmap = cmap
-    
+        self.next_species_value = self._number_of_species()
+        
     
     def _new_species(self):
         """With probability alpha * gamma / L**2, choose a random point on the grid.
@@ -58,10 +45,11 @@ class LichenModel:
         Then create a new node in the interaction network and potentially connect it to existing nodes, and all existing nodes to it.
         Always connect it to the node of the species that was at the site before it spawned.            
         """
-        if np.random.uniform() < 0.1: #self.alpha * self.gamma / self.L**2:
+        if np.random.uniform() < 0.1:#self.alpha * self.gamma / self.L**2:
             # Find the site to spawn the new species on, and its value
             x, y = np.random.randint(low=0, high=self.L, size=2)
-            new_species_value = len(self.color_map)  # Assign a new unique value for the new species
+            new_species_value = self.next_species_value  # Assign a new unique value for the new species
+            self.next_species_value += 1
 
             # Add the new species to the interaction network and connect it to the species that was at the site before it spawned
             self.interaction_network.add_node(new_species_value)            
@@ -69,15 +57,6 @@ class LichenModel:
             
             # Update the grid to contain the new species
             self.lichen[x, y] = new_species_value
-            
-            # Assign a new color for the new species
-            cmap = plt.get_cmap('tab20')
-            print(self.color_map)
-            self.color_map[new_species_value] = cmap(new_species_value % 20)
-            print(self.color_map)
-            
-            # Update the colormap for the grid plot
-            self._update_colormap()
             
             # For each other species, check if both the new species can invade that species and vice versa
             for node in self.interaction_network.nodes():
@@ -115,7 +94,15 @@ class LichenModel:
         # Check if the picked site can invade the neighbour from interaction_network
         if self.interaction_network.has_edge(self.lichen[x, y], self.lichen[x_nbor, y_nbor]):
             self.lichen[x_nbor, y_nbor] = self.lichen[x, y]
-                
+
+
+    def _remove_dead_species(self):
+        """Any species that has no values on the grid should be removed from the interaction network.
+        """
+        for node in list(self.interaction_network.nodes()):
+            if np.sum(self.lichen == node) == 0:
+                self.interaction_network.remove_node(node)
+
     
     def _lichen_step(self):
         """In each time step, pick a random site and a neighbour. If the chosen site can invade the neighbour, it does so.
@@ -123,14 +110,29 @@ class LichenModel:
         """
         self._invade()
         self._new_species()
+        self._remove_dead_species()
         
+
+    def _current_list_of_colors(self):
+        current_list_of_colors = []
+        for node in self.interaction_network.nodes():
+            print(node, self.color_list[node])
+            current_list_of_colors.append(self.color_list[node])
+        print(self.lichen)    
+
+        print("")
+        
+        return current_list_of_colors
+    
     
     def _initial_image(self):
         self.plot_placeholder = st.empty()
 
         # Display initial grid state
         self.fig, (self.ax1, self.ax2) = plt.subplots(1, 2, figsize=(12, 6))
-        self.img = self.ax1.imshow(self.lichen, cmap=self.current_cmap, interpolation='nearest')
+        current_list_of_colors = self._current_list_of_colors()        
+        cmap = mcolors.ListedColormap(list(current_list_of_colors))
+        self.img = self.ax1.imshow(self.lichen, interpolation='nearest', cmap=cmap)
         self.ax1.set_xticks([])
         self.ax1.set_yticks([])
         self.ax1.set_title("Initial State", fontsize=10)
@@ -148,8 +150,8 @@ class LichenModel:
         
         # Draw nodes with colors matching the grid plot
         species_sizes = [np.sum(self.lichen == node) * 20 for node in self.interaction_network.nodes()]
-        species_colors = [self.color_map[node] for node in self.interaction_network.nodes()]
-        nx.draw_networkx_nodes(self.interaction_network, pos, ax=self.ax2, node_size=species_sizes, node_color=species_colors)
+        species_color = [self.color_list[node] for node in self.interaction_network.nodes()]
+        nx.draw_networkx_nodes(self.interaction_network, pos, ax=self.ax2, node_size=species_sizes, node_color=species_color)
         nx.draw_networkx_labels(self.interaction_network, pos, labels={node: str(node) for node in self.interaction_network.nodes()}, ax=self.ax2, font_size=10, font_color='white')
         
         # Draw active (green) and potential (grey) interactions
@@ -171,8 +173,13 @@ class LichenModel:
     
     
     def _append_fig(self, step):
+        self.ax1.clear()
+        # Get the cmap
+        current_list_of_colors = self._current_list_of_colors()
+        cmap = mcolors.ListedColormap(list(current_list_of_colors))
         # Update the grid state
-        self.img.set_data(self.lichen)
+        self.ax1.imshow(self.lichen, interpolation='nearest', cmap=cmap)
+        self.ax1.set(xticks=[], yticks=[])
         self.ax1.set_title(f"Step {step + 1}", fontsize=10)
         
         # Update the network state
@@ -189,4 +196,5 @@ class LichenModel:
         if st.button("Play"):
             for step in range(self.time_steps):
                 self._lichen_step()
-                self._append_fig(step)
+                if (step + 1) % self.refresh_rate == 0:
+                    self._append_fig(step)
