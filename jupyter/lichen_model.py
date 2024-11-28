@@ -64,6 +64,9 @@ class LichenModel:
             cmap = plt.get_cmap('tab10')
             self.color_map[new_species_value] = cmap(len(self.color_map) % 10)
             
+            # Update the ListedColormap for the grid plot
+            self.img.set_cmap(mcolors.ListedColormap([self.color_map[i] for i in sorted(self.color_map.keys())]))
+            
             # For each other species, check if both the new species can invade that species and vice versa
             for node in self.interaction_network.nodes():
                 if np.random.uniform() < self.gamma:
