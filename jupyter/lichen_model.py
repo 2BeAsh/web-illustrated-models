@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 class LichenModel:
     def __init__(self):
-        pass
+        self.node_positions = None  # To store fixed positions of nodes
     
     
     def _streamlit_setup(self):
@@ -32,6 +32,7 @@ class LichenModel:
         self.lichen[:5, :5] = 1
         self.lichen[-5:, -5:] = 2
         self.interaction_network = nx.erdos_renyi_graph(n=self._number_of_species(), p=self.gamma, directed=True)
+        self.node_positions = nx.spring_layout(self.interaction_network)  # Initialize node positions
     
         
     def _new_species(self):
@@ -40,7 +41,7 @@ class LichenModel:
         Then create a new node in the interaction network and potentially connect it to existing nodes, and all existing nodes to it.
         Always connect it to the node of the species that was at the site before it spawned.            
         """
-        if np.random.uniform() < 1:#self.alpha * self.gamma / self.L**2:
+        if np.random.uniform() < self.alpha * self.gamma / self.L**2:
             # Find the site to spawn the new species on, and its value
             x, y = np.random.randint(low=0, high=self.L, size=2)
             new_species_value = self._number_of_species()
@@ -58,6 +59,9 @@ class LichenModel:
                     self.interaction_network.add_edge(new_species_value, node)
                 if np.random.uniform() < self.gamma:
                     self.interaction_network.add_edge(node, new_species_value)
+            
+            # Update positions to include the new node
+            self.node_positions = nx.spring_layout(self.interaction_network, pos=self.node_positions, fixed=self.node_positions.keys())
     
     
     def _get_neighbors(self, x, y):
@@ -150,7 +154,9 @@ class LichenModel:
     
     def _update_network_plot(self):
         self.ax2.clear()
-        pos = nx.spring_layout(self.interaction_network)
+        
+        # Use fixed positions for nodes
+        pos = self.node_positions
         
         # Draw nodes, with size representing population size
         species_sizes = [np.sum(self.lichen == node) * 20 for node in self.interaction_network.nodes()]
