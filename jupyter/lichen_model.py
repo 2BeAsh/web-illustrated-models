@@ -48,7 +48,7 @@ class LichenModel:
         Then create a new node in the interaction network and potentially connect it to existing nodes, and all existing nodes to it.
         Always connect it to the node of the species that was at the site before it spawned.            
         """
-        if np.random.uniform() < 0.1 # self.alpha * self.gamma / self.L**2:
+        if np.random.uniform() < 0.1: # self.alpha * self.gamma / self.L**2:
             # Find the site to spawn the new species on, and its value
             x, y = np.random.randint(low=0, high=self.L, size=2)
             new_species_value = np.max(self.lichen) + 1
