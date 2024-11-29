@@ -36,8 +36,18 @@ class LichenModel:
         self.interaction_network = nx.erdos_renyi_graph(n=self._number_of_species(), p=self.gamma, directed=True)
         self.node_positions = nx.spring_layout(self.interaction_network)  # Initialize node positions
         
-        self.next_species_value = self._number_of_species()
-        
+        self.next_species_value = self._get_next_species_value()
+    
+    
+    def _get_next_species_value(self):
+        """Next species value is either 1 plus the current max valued species, or the lowest number between the min and the max value.
+        This allows species values to be reused if a species is dead.
+        """
+        all_values = np.arange(0, np.max(self.lichen)+2)  # +1 to include the max value, another +1 to include the next value
+        possible_values_idx = np.isin(all_values, np.unique(self.lichen), invert=True, assume_unique=True)
+        possible_values = all_values[possible_values_idx]        
+        return np.min(possible_values)
+    
     
     def _new_species(self):
         """With probability alpha * gamma / L**2, choose a random point on the grid.
@@ -48,8 +58,7 @@ class LichenModel:
         if np.random.uniform() < 0.1:#self.alpha * self.gamma / self.L**2:
             # Find the site to spawn the new species on, and its value
             x, y = np.random.randint(low=0, high=self.L, size=2)
-            new_species_value = self.next_species_value  # Assign a new unique value for the new species
-            self.next_species_value += 1
+            new_species_value = self._get_next_species_value()
 
             # Add the new species to the interaction network and connect it to the species that was at the site before it spawned
             self.interaction_network.add_node(new_species_value)            
@@ -116,12 +125,8 @@ class LichenModel:
     def _current_list_of_colors(self):
         current_list_of_colors = []
         for node in self.interaction_network.nodes():
-            print(node, self.color_list[node])
             current_list_of_colors.append(self.color_list[node])
-        print(self.lichen)    
 
-        print("")
-        
         return current_list_of_colors
     
     
@@ -152,21 +157,32 @@ class LichenModel:
         species_sizes = [np.sum(self.lichen == node) * 20 for node in self.interaction_network.nodes()]
         species_color = [self.color_list[node] for node in self.interaction_network.nodes()]
         nx.draw_networkx_nodes(self.interaction_network, pos, ax=self.ax2, node_size=species_sizes, node_color=species_color)
-        nx.draw_networkx_labels(self.interaction_network, pos, labels={node: str(node) for node in self.interaction_network.nodes()}, ax=self.ax2, font_size=10, font_color='white')
+        # nx.draw_networkx_labels(self.interaction_network, pos, labels={node: str(node) for node in self.interaction_network.nodes()}, ax=self.ax2, font_size=10, font_color='white')
         
         # Draw active (green) and potential (grey) interactions
         active_edges = []
         potential_edges = []
+        number_of_active_sites = []
         for u, v in self.interaction_network.edges():
-            if np.any((self.lichen == u) & (np.roll(self.lichen, 1, axis=0) == v)) or \
-               np.any((self.lichen == u) & (np.roll(self.lichen, -1, axis=0) == v)) or \
-               np.any((self.lichen == u) & (np.roll(self.lichen, 1, axis=1) == v)) or \
-               np.any((self.lichen == u) & (np.roll(self.lichen, -1, axis=1) == v)):
+            # Both u -> v and v -> u are considered by having 1 and -1 shifts. 
+            # Count the number of sites that border a species which the other species can invade
+            left = np.count_nonzero((self.lichen == u) & (np.roll(self.lichen, 1, axis=0) == v))
+            right = np.count_nonzero((self.lichen == u) & (np.roll(self.lichen, -1, axis=0) == v))
+            up = np.count_nonzero((self.lichen == u) & (np.roll(self.lichen, 1, axis=1) == v))
+            down = np.count_nonzero((self.lichen == u) & (np.roll(self.lichen, -1, axis=1) == v))
+            
+            all_active_sites = left + right + up + down
+            # If there are any active sites, the interaction is active
+            if all_active_sites > 0:
                 active_edges.append((u, v))
             else:
                 potential_edges.append((u, v))
+            
+            number_of_active_sites.append(all_active_sites)
+
+        edge_width = np.maximum(np.array(number_of_active_sites) / 4, 1)
         
-        nx.draw_networkx_edges(self.interaction_network, pos, ax=self.ax2, edgelist=active_edges, edge_color='green', width=2)
+        nx.draw_networkx_edges(self.interaction_network, pos, ax=self.ax2, edgelist=active_edges, edge_color='green', width=edge_width)
         nx.draw_networkx_edges(self.interaction_network, pos, ax=self.ax2, edgelist=potential_edges, edge_color='grey', style='dashed')
         
         self.ax2.set_title("Interaction Network", fontsize=10)
