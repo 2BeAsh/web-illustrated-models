@@ -8,18 +8,18 @@ import matplotlib.colors as mcolors
 class LichenModel:
     def __init__(self):
         self.node_positions = None  # To store fixed positions of nodes
-        self.color_list = ["red", "blue", "green", "yellow", "purple", "orange", "brown", "pink", "grey", "cyan"]
-    
+        self.color_list = [mcolors.to_hex(color) for color in plt.cm.tab20.colors]
+
     
     def _streamlit_setup(self):
         st.header("Lichen Model")
         st.sidebar.header("Lichen Model Parameters")
         
-        self.L = st.sidebar.slider("Grid Size (L)", min_value=10, max_value=100, value=50, step=10)
+        self.L = st.sidebar.slider("Grid Size (L)", min_value=10, max_value=200, value=50, step=10)
         self.alpha = st.sidebar.slider("Evolve rate", min_value=0.0, max_value=1.0, value=0.1, step=0.025)
         self.gamma = st.sidebar.slider("Interaction probability", min_value=0.0, max_value=1.0, value=0.1, step=0.025)
-        self.time_steps = st.sidebar.number_input("Time steps", min_value=1, max_value=1000, value=100, step=10)
-        self.refresh_rate = st.sidebar.slider("Steps per update", min_value=1, max_value=100, value=10, step=1)
+        self.time_steps = st.sidebar.number_input("Time steps", min_value=1, max_value=10_0000, value=1000, step=10)
+        self.refresh_rate = st.sidebar.slider("Steps per update", min_value=1, max_value=1000, value=50, step=10)
     
     
     def _number_of_species(self):
@@ -31,10 +31,11 @@ class LichenModel:
         Also create the interaction network between the species.
         """
         self.lichen = np.zeros(shape=(self.L, self.L), dtype=int)
-        self.lichen[:5, :5] = 1
-        self.lichen[-5:, -5:] = 2
+        self.lichen[:self.L//3, :self.L //3] = 1  # Upper left corner
+        self.lichen[-self.L //3:, -self.L //3:] = 2  # Lower right corner
+        self.lichen[int(0.4 * self.L) : int(0.6 * self.L), int(0.4 * self.L) : int(0.6 * self.L)] = 3 # Center'ish
         self.interaction_network = nx.erdos_renyi_graph(n=self._number_of_species(), p=self.gamma, directed=True)
-        self.node_positions = nx.spring_layout(self.interaction_network)  # Initialize node positions
+        self.node_positions = nx.arf_layout(self.interaction_network, seed=42)  # Initialize node positions
         
         self.next_species_value = self._get_next_species_value()
     
@@ -55,7 +56,7 @@ class LichenModel:
         Then create a new node in the interaction network and potentially connect it to existing nodes, and all existing nodes to it.
         Always connect it to the node of the species that was at the site before it spawned.            
         """
-        if np.random.uniform() < 0.1:#self.alpha * self.gamma / self.L**2:
+        if np.random.uniform() < self.alpha * self.gamma / self.L**2:
             # Find the site to spawn the new species on, and its value
             x, y = np.random.randint(low=0, high=self.L, size=2)
             new_species_value = self._get_next_species_value()
@@ -76,7 +77,7 @@ class LichenModel:
                         self.interaction_network.add_edge(node, new_species_value)
             
             # Update positions to include the new node
-            self.node_positions = nx.spring_layout(self.interaction_network, pos=self.node_positions, fixed=self.node_positions.keys())
+            self.node_positions = nx.arf_layout(self.interaction_network, pos=self.node_positions, seed=42)# fixed=list(self.node_positions.keys()), seed=42)
     
     
     def _get_neighbors(self, x, y):
@@ -156,8 +157,7 @@ class LichenModel:
         # Draw nodes with colors matching the grid plot
         species_sizes = [np.sum(self.lichen == node) * 20 for node in self.interaction_network.nodes()]
         species_color = [self.color_list[node] for node in self.interaction_network.nodes()]
-        nx.draw_networkx_nodes(self.interaction_network, pos, ax=self.ax2, node_size=species_sizes, node_color=species_color)
-        # nx.draw_networkx_labels(self.interaction_network, pos, labels={node: str(node) for node in self.interaction_network.nodes()}, ax=self.ax2, font_size=10, font_color='white')
+        nx.draw_networkx_nodes(self.interaction_network, pos, ax=self.ax2, node_size=np.array(species_sizes) / self.L, node_color=species_color, edgecolors='black', linewidths=0.5, alpha=0.9)
         
         # Draw active (green) and potential (grey) interactions
         active_edges = []
@@ -166,12 +166,19 @@ class LichenModel:
         for u, v in self.interaction_network.edges():
             # Both u -> v and v -> u are considered by having 1 and -1 shifts. 
             # Count the number of sites that border a species which the other species can invade
-            left = np.count_nonzero((self.lichen == u) & (np.roll(self.lichen, 1, axis=0) == v))
-            right = np.count_nonzero((self.lichen == u) & (np.roll(self.lichen, -1, axis=0) == v))
-            up = np.count_nonzero((self.lichen == u) & (np.roll(self.lichen, 1, axis=1) == v))
-            down = np.count_nonzero((self.lichen == u) & (np.roll(self.lichen, -1, axis=1) == v))
+            # Take closed boundaries into account by making shorter lichen grids
+            lichen_no_top = self.lichen[1:, :]
+            lichen_no_bot = self.lichen[:-1, :]
+            lichen_no_left = self.lichen[:, 1:]
+            lichen_no_right = self.lichen[:, :-1]
             
-            all_active_sites = left + right + up + down
+            left_active_sites = np.count_nonzero((lichen_no_left == u) & (lichen_no_right == v))
+            right_active_sites = np.count_nonzero((lichen_no_right == u) & (lichen_no_left == v))
+            up_active_sites = np.count_nonzero((lichen_no_top == u) & (lichen_no_bot == v))
+            down_active_sites = np.count_nonzero((lichen_no_bot == u) & (lichen_no_top == v))
+            
+            all_active_sites = left_active_sites + right_active_sites + up_active_sites + down_active_sites        
+
             # If there are any active sites, the interaction is active
             if all_active_sites > 0:
                 active_edges.append((u, v))
